@@ -4,15 +4,17 @@ import axios, {
   AxiosRequestConfig,
   AxiosResponse,
 } from "axios";
-import { ConfigurationError } from "../errors/InfrastructureError.error";
+
 import {
   AbsoluteUrl,
   ErrorMapper,
+  getTargetFromPredicate,
   HttpClient,
   HttpClientGetConfig,
   HttpClientPostConfig,
   HttpResponse,
 } from "../httpClient";
+
 import {
   onFullfilledDefaultResponseInterceptorMaker,
   onRejectDefaultResponseInterceptorMaker,
@@ -26,46 +28,36 @@ type AxiosInstanceContext = {
   onRejectResponseInterceptor: (rawAxiosError: AxiosError) => never;
 };
 
+type ContextType<TargetUrls extends string> = {
+  config: AxiosRequestConfig;
+  target: TargetUrls;
+  errorMapper: ErrorMapper<TargetUrls>;
+};
+
 export class ManagedAxios<TargetUrls extends string> implements HttpClient {
   constructor(
     //prettier-ignore
-    private readonly targetsUrls: Record<TargetUrls, (params: any) => AbsoluteUrl>,
+    public readonly targetsUrls: Record<TargetUrls, (params?: any) => AbsoluteUrl>,
     //prettier-ignore
-    private readonly targetsErrorResponseOverrideMapper: ErrorMapper<TargetUrls> = {},
+    private readonly targetsErrorMapper: ErrorMapper<TargetUrls> = {},
     //prettier-ignore
     private readonly defaultRequestConfig: AxiosRequestConfig = {},
     //prettier-ignore
     private readonly onFulfilledResponseInterceptorMaker:
-      (context: any) =>
+      (context: ContextType<TargetUrls>) =>
         (response: AxiosResponse) => AxiosResponse =
           onFullfilledDefaultResponseInterceptorMaker,
     //prettier-ignore
     private readonly onRejectResponseInterceptorMaker:
-      (context: any) =>
+      (context: ContextType<TargetUrls>) =>
         (rawAxiosError: AxiosError) => never =
           onRejectDefaultResponseInterceptorMaker,
   ) {}
-
-  /*  public static createManagedInstance<TargetUrls extends string>(
-    targetsUrlsMapper: TargetUrlsMapper<TargetUrls>,
-    //targetsErrorResponseOverrideMapper: ErrorMapper<TargetUrls> = {},
-    axiosRequestConfig: AxiosRequestConfig = {},
-    onFulfilledResponseInterceptorMaker: (response: AxiosResponse) => AxiosResponse,
-    onRejectResponseInterceptorMaker: (rawAxiosError: AxiosError) => never,
-  ): HttpClient {
-    return new ManagedAxios({});
-  }*/
 
   private static workerInstance = (
     context: AxiosInstanceContext,
   ): AxiosInstance => {
     const axiosInstance = axios.create(context.axiosRequestConfig);
-
-    //TODO Add request interceptors ?
-    /*    axiosInstance.interceptors.request.use(
-      axiosValidRequestInterceptor(targetsUrlsMapper),
-      axiosErrorRequestInterceptor,
-    );*/
 
     axiosInstance.interceptors.response.use(
       context.onFulfilledResponseInterceptor,
@@ -111,16 +103,15 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
       this.targetsUrls,
     ) as TargetUrls;
     const mergedConfigs = { ...this.defaultRequestConfig, ...targetConfig };
-    const onFulfilledResponseInterceptor =
-      this.onFulfilledResponseInterceptorMaker({
-        config: { ...this.defaultRequestConfig, ...targetConfig },
+    const context = {
+      config: mergedConfigs,
         target,
-      });
+        errorMapper: this.targetsErrorMapper,
+    }
 
-    const onRejectResponseInterceptor = this.onRejectResponseInterceptorMaker({
-      target,
-      config: { ...this.defaultRequestConfig, ...targetConfig },
-    });
+    const onFulfilledResponseInterceptor = this.onFulfilledResponseInterceptorMaker(context);
+    const onRejectResponseInterceptor = this.onRejectResponseInterceptorMaker(context);
+
     return {
       axiosRequestConfig: mergedConfigs,
       onFulfilledResponseInterceptor,
@@ -128,17 +119,3 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
     };
   };
 }
-
-export const getTargetFromPredicate = (
-  predicate: (params: any) => AbsoluteUrl,
-  targetsUrls: Record<string, (params: any) => AbsoluteUrl>,
-): string | never => {
-  const target: string | undefined = Object.keys(targetsUrls).find(
-    (targetsUrlKey) => targetsUrls[targetsUrlKey] === predicate,
-  );
-  if (!target)
-    throw new ConfigurationError(
-      "Invalid configuration: This target predicate does not match any registered target",
-    );
-  return target;
-};
