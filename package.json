@@ -1,6 +1,6 @@
 {
   "name": "@serenity-dev/http-client",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "WIP: An httpClient with additional functionalities",
   "keywords": [
     "httpclient",
@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "contributors": [],
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/romain-cambonie/serenity-http-client.git"
