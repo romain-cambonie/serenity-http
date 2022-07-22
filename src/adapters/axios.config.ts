@@ -1,14 +1,13 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { isHttpError } from "../errors/error.types";
-import { InfrastructureError } from "../errors/InfrastructureError.error";
-import { ErrorMapper } from "../httpClient";
 import {
-  toHttpError,
   toInfrastructureError,
-  toMappedErrorIfOverridenMaker,
+  toMappedErrorMaker,
   toUnhandledError,
-} from "./axios.mappers";
-import { AxiosErrorWithResponse } from "./axios.port";
+} from "../httpClient.mappers";
+import { InfrastructureError } from "../errors/InfrastructureError.error";
+import { ErrorMapper, isHttpError } from "../httpClient";
+import { toHttpError } from "./axios.mappers";
+import { AxiosErrorWithResponse } from "./axios.adapter";
 
 export const onFullfilledDefaultResponseInterceptorMaker =
   () =>
@@ -28,20 +27,15 @@ export const onRejectDefaultResponseInterceptorMaker = <
 >(context: {
   target: TargetUrls;
   errorMapper: ErrorMapper<TargetUrls>;
-  isValidErrorResponse: (
-    response: AxiosResponse | undefined,
-  ) => response is AxiosResponse;
 }) => {
-  const toMappedErrorIfOverriden = toMappedErrorIfOverridenMaker(
-    context.target,
-    context.errorMapper,
-  );
+  const toMappedError = toMappedErrorMaker(context.target, context.errorMapper);
 
   return (rawAxiosError: AxiosError): never => {
     const infrastructureError: InfrastructureError | undefined =
       toInfrastructureError(rawAxiosError);
-    if (infrastructureError) throw infrastructureError;
+    if (infrastructureError) throw toMappedError(infrastructureError);
 
+    // TODO Create Unhandled Error type
     if (!axios.isAxiosError(rawAxiosError))
       throw toUnhandledError(
         `error Response does not have the property isAxiosError set to true`,
@@ -62,11 +56,11 @@ export const onRejectDefaultResponseInterceptorMaker = <
         rawAxiosError,
       );
 
-    throw toMappedErrorIfOverriden(error);
+    throw toMappedError(error);
   };
 };
 
-const isValidErrorResponse = (
+export const isValidErrorResponse = (
   response: AxiosResponse | undefined,
 ): response is AxiosResponse =>
   !!response && typeof response.status === "number" && !!response.data;
@@ -76,6 +70,3 @@ const isValidErrorResponse = (
 // TODO Do we have to further test what is a valid axios response format for us ?
 //&& !!headers && !!config: AxiosRequestConfig
 
-// TODO Pole Emploi consider "" to be a valid error response body
-const _poleEmploiIsValidResponseBody = (data: any): boolean =>
-  !!data || data === "";

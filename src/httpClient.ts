@@ -1,8 +1,35 @@
+import { ConfigurationError } from "./errors/ConfigurationError.error";
 import { HttpClientError } from "./errors/HttpClientError.error";
 import { HttpServerError } from "./errors/HttpServerError.error";
 
-type Http = "http://" | "https://";
+export interface HttpClient {
+  get: (config: HttpClientGetConfig) => Promise<HttpResponse>;
+  post: (config: HttpClientPostConfig) => Promise<HttpResponse>;
+  //get$: (config: HttpClientGetConfig) => Observable<HttpResponse>;
+  //post$: (config: HttpClientPostConfig) => Observable<HttpResponse>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+}
 
+export const getTargetFromPredicate = (
+  predicate: (params: any) => AbsoluteUrl,
+  targetsUrls: Record<string, (params: any) => AbsoluteUrl>,
+): string | never => {
+  const target: string | undefined = Object.keys(targetsUrls).find(
+    (targetsUrlKey) => targetsUrls[targetsUrlKey] === predicate,
+  );
+  if (!target)
+    throw new ConfigurationError(
+      "Invalid configuration: This target predicate does not match any registered target",
+    );
+  return target;
+};
+
+export const isHttpError = (
+  error: any,
+): error is HttpClientError | HttpServerError =>
+  error instanceof HttpClientError || error instanceof HttpServerError;
+
+type Http = "http://" | "https://";
 export type AbsoluteUrl = `${Http}${string}`;
 
 export const isHttpClientError = (status: number): boolean =>
@@ -11,20 +38,17 @@ export const isHttpClientError = (status: number): boolean =>
 export const isHttpServerError = (status: number): boolean =>
   status >= 500 && status < 600;
 
-export type ErrorMapper<TargetUrls extends string> = Partial<
-  Record<
-    TargetUrls,
-    Partial<Record<number, (error: HttpServerError | HttpClientError) => Error>>
-  >
->;
-
 export type TargetUrlsMapper<TargetUrls extends string> = Record<
   TargetUrls,
   (params: any) => AbsoluteUrl
 >;
 
-export interface HttpResponse<T = any, _D = any> {
-  data: T;
+export type ErrorMapper<TargetUrls extends string> = Partial<
+  Record<TargetUrls, Partial<Record<string, (error: Error) => Error>>>
+>;
+
+export interface HttpResponse {
+  data: unknown;
   status: number;
   statusText: string;
   headers: any;
@@ -40,35 +64,7 @@ export type HttpClientPostConfig = {
 };
 
 export type HttpClientGetConfig = {
-  // TODO Should target returns AbsoluteUrl ?
   target: (params: any) => AbsoluteUrl;
   targetParams?: any;
   adapterConfig?: any;
 };
-
-export interface HttpClient {
-  get: (config: HttpClientGetConfig) => Promise<HttpResponse>;
-  post: (config: HttpClientPostConfig) => Promise<HttpResponse>;
-  //get$: (config: HttpClientGetConfig) => Observable<HttpResponse>;
-  //post$: (config: HttpClientPostConfig) => Observable<HttpResponse>;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-}
-
-/*export type HttpClientPostConfig<TargetUrls extends string> = {
-  target: TargetUrls;
-  data?: string | undefined;
-  adapterConfig?: any;
-};
-
-export type HttpClientGetConfig<TargetUrls extends string> = {
-  target: TargetUrls;
-  adapterConfig?: any;
-};
-
-export interface HttpClient {
-  get: (config: HttpClientGetConfig<TargetUrls>) => Promise<HttpResponse>;
-  post: (config: HttpClientPostConfig<TargetUrls>) => Promise<HttpResponse>;
-  //get$: (config: HttpClientGetConfig) => Observable<HttpResponse>;
-  //post$: (config: HttpClientPostConfig) => Observable<HttpResponse>;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-}*/
