@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "target": "es6",
+    "target": "es2017",
     "lib": ["esNext"],
     "module": "ESNext",
     "moduleResolution": "Node",
+    "declaration": true,
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
     "noImplicitOverride": true,
     "skipLibCheck": true /* Skip type checking of declaration files. */,
-    "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
-  }
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
+  },
+  "exclude": ["/**/*.test.ts",
+    "jest.config.ts"
+  ]
 }
