@@ -1,12 +1,12 @@
 import { ManagedAxios } from "./axios.adapter";
 
 import {
+  AbsoluteUrl,
   ErrorMapper,
   HttpClient,
   HttpResponse,
   TargetUrlsMapper,
 } from "../httpClient";
-import { AbsoluteUrl } from "../../AbsoluteUrl";
 import { HttpClientError } from "../errors/HttpClientError.error";
 
 describe("httpClient with axios concrete adapter", () => {
