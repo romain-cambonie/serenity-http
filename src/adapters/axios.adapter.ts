@@ -105,12 +105,14 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
     const mergedConfigs = { ...this.defaultRequestConfig, ...targetConfig };
     const context = {
       config: mergedConfigs,
-        target,
-        errorMapper: this.targetsErrorMapper,
-    }
+      target,
+      errorMapper: this.targetsErrorMapper,
+    };
 
-    const onFulfilledResponseInterceptor = this.onFulfilledResponseInterceptorMaker(context);
-    const onRejectResponseInterceptor = this.onRejectResponseInterceptorMaker(context);
+    const onFulfilledResponseInterceptor =
+      this.onFulfilledResponseInterceptorMaker(context);
+    const onRejectResponseInterceptor =
+      this.onRejectResponseInterceptorMaker(context);
 
     return {
       axiosRequestConfig: mergedConfigs,
