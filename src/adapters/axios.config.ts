@@ -1,13 +1,12 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
-import {
-  toInfrastructureError,
-  toMappedErrorMaker,
-  toUnhandledError,
-} from "../httpClient.mappers";
-import { InfrastructureError } from "../errors/InfrastructureError.error";
+import axios, {
+  AxiosError,
+  AxiosResponse,
+} from "axios";
 import { ErrorMapper, isHttpError } from "../httpClient";
-import { toHttpError } from "./axios.mappers";
+import { toMappedErrorMaker, toUnhandledError } from "../httpClient.mappers";
 import { AxiosErrorWithResponse } from "./axios.adapter";
+import { toInfrastructureError, toHttpError } from "./axios.mappers";
+import { InfrastructureErrorKinds } from "./errors";
 
 export const onFullfilledDefaultResponseInterceptorMaker =
   () =>
@@ -30,18 +29,22 @@ export const onRejectDefaultResponseInterceptorMaker = <
 }) => {
   const toMappedError = toMappedErrorMaker(context.target, context.errorMapper);
 
+  // TODO Because error handling logic is complicated
+  //  it should be worth it to extract part of the following logic as functions with clear responsibilities
   return (rawAxiosError: AxiosError): never => {
-    const infrastructureError: InfrastructureError | undefined =
+    // Handle infrastructure and network errors
+    const infrastructureError: InfrastructureErrorKinds | undefined =
       toInfrastructureError(rawAxiosError);
     if (infrastructureError) throw toMappedError(infrastructureError);
 
-    // TODO Create Unhandled Error type
+    // Axios failed to convert the error into a valid error
     if (!axios.isAxiosError(rawAxiosError))
       throw toUnhandledError(
         `error Response does not have the property isAxiosError set to true`,
         rawAxiosError,
       );
 
+    // Error does not satisfy our minimal requirements
     if (!isValidErrorResponse(rawAxiosError.response))
       throw toUnhandledError(
         "error response objects does not have mandatory keys",
@@ -50,6 +53,7 @@ export const onRejectDefaultResponseInterceptorMaker = <
 
     const error = toHttpError(rawAxiosError as AxiosErrorWithResponse);
 
+    // Failed to convert the error into a valid http error
     if (!isHttpError(error))
       throw toUnhandledError(
         "failed to convert error to HttpClientError or HttpServerError",
@@ -69,4 +73,3 @@ export const isValidErrorResponse = (
 
 // TODO Do we have to further test what is a valid axios response format for us ?
 //&& !!headers && !!config: AxiosRequestConfig
-
