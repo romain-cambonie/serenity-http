@@ -22,6 +22,7 @@ describe("httpClient with axios concrete adapter", () => {
   });
 
   it("should call API Adresse and return 200 with data", async () => {
+
     type TargetUrls = "ADRESS_API_ENDPOINT";
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
       ADRESS_API_ENDPOINT: targetToValidSearchUrl,
