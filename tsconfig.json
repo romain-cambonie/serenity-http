@@ -6,7 +6,6 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "declaration": true,
-    "declarationDir": "lib/types",
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
