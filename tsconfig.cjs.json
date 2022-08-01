@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "outDir": "lib/esm",
+    "outDir": "lib/cjs",
     "target": "es2017",
     "lib": ["esNext"],
-    "module": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "Node",
-    "declaration": true,
-    "declarationDir": "lib/types",
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
