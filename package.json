@@ -1,6 +1,6 @@
 {
   "name": "@serenity-dev/http-client",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "description": "WIP: An httpClient with additional functionalities",
   "keywords": [
     "httpclient",
@@ -9,7 +9,7 @@
   "homepage": "https://npmjs.com/package/@serenity-dev/http-client",
   "scripts": {
     "test": "jest",
-    "build": "rm -rf lib && yarn build-esm && yarn build-cjs",
+    "build": "yarn build-esm && yarn build-cjs",
     "build-esm": "tsc -p tsconfig.json",
     "build-cjs": "tsc -p tsconfig.cjs.json"
   },
@@ -21,9 +21,8 @@
     "type": "git",
     "url": "https://github.com/romain-cambonie/serenity-http-client.git"
   },
-  "main": "./lib/cjs/index.js",
+  "main": "./lib/esm/index.js",
   "module": "./lib/esm/index.js",
-  "types": "./lib/types/index.d.ts",
   "dependencies": {
     "axios": "^0.26.1"
   },
