@@ -19,6 +19,7 @@ import {
   onFullfilledDefaultResponseInterceptorMaker,
   onRejectDefaultResponseInterceptorMaker,
 } from "./axios.config";
+import { deepMergeConfigs } from "./axios.mappers";
 
 export type AxiosErrorWithResponse = AxiosError & { response: AxiosResponse };
 
@@ -36,18 +37,13 @@ export type ContextType<TargetUrls extends string> = {
 
 export class ManagedAxios<TargetUrls extends string> implements HttpClient {
   constructor(
-    //prettier-ignore
     public readonly targetsUrls: Record<TargetUrls, (params?: any) => AbsoluteUrl>,
-    //prettier-ignore
     private readonly targetsErrorMapper: ErrorMapper<TargetUrls> = {},
-    //prettier-ignore
     private readonly defaultRequestConfig: AxiosRequestConfig = {},
-    //prettier-ignore
     private readonly onFulfilledResponseInterceptorMaker:
       (context: ContextType<TargetUrls>) =>
         (response: AxiosResponse) => AxiosResponse =
           onFullfilledDefaultResponseInterceptorMaker,
-    //prettier-ignore
     private readonly onRejectResponseInterceptorMaker:
       (context: ContextType<TargetUrls>) =>
         (rawAxiosError: AxiosError) => never =
@@ -102,7 +98,7 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
       targetConfig.target,
       this.targetsUrls,
     ) as TargetUrls;
-    const mergedConfigs = { ...this.defaultRequestConfig, ...targetConfig };
+    const mergedConfigs = deepMergeConfigs(this.defaultRequestConfig, targetConfig);
     const context = {
       config: mergedConfigs,
       target,
@@ -120,4 +116,7 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
       onRejectResponseInterceptor,
     };
   };
+
+
 }
+

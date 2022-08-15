@@ -53,7 +53,7 @@ export interface HttpResponse {
   status: number;
   statusText: string;
   headers: any;
-  config: any;
+  config: AdapterConfig;
   request?: any;
 }
 
@@ -61,11 +61,54 @@ export type HttpClientPostConfig = {
   target: (params: any) => AbsoluteUrl;
   targetParams?: any;
   data?: string | undefined;
-  adapterConfig?: any;
+  adapterConfig?: AdapterConfig;
 };
 
 export type HttpClientGetConfig = {
   target: (params: any) => AbsoluteUrl;
   targetParams?: any;
-  adapterConfig?: any;
+  adapterConfig?: AdapterConfig;
 };
+
+type Method =
+  | 'get' | 'GET'
+  | 'delete' | 'DELETE'
+  | 'head' | 'HEAD'
+  | 'options' | 'OPTIONS'
+  | 'post' | 'POST'
+  | 'put' | 'PUT'
+  | 'patch' | 'PATCH'
+  | 'purge' | 'PURGE'
+  | 'link' | 'LINK'
+  | 'unlink' | 'UNLINK';
+
+export type RequestHeaders = Record<string, string | number | boolean>;
+
+
+// TODO Equivalent to axios AxiosRequestConfig for now
+export type AdapterConfig = {
+  url?: string;
+  method?: Method;
+  baseURL?: string;
+  headers?: RequestHeaders;
+  params?: any;
+  paramsSerializer?: (params: any) => string;
+  data?: unknown;
+  timeout?: number;
+  timeoutErrorMessage?: string;
+  withCredentials?: boolean;
+  xsrfCookieName?: string;
+  xsrfHeaderName?: string;
+  onUploadProgress?: (progressEvent: any) => void;
+  onDownloadProgress?: (progressEvent: any) => void;
+  maxContentLength?: number;
+  validateStatus?: ((status: number) => boolean) | null;
+  maxBodyLength?: number;
+  maxRedirects?: number;
+  socketPath?: string | null;
+  httpAgent?: any;
+  httpsAgent?: any;
+  decompress?: boolean;
+  signal?: AbortSignal;
+  insecureHTTPParser?: boolean;
+}

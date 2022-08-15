@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import { HttpClientError, HttpClientForbiddenError } from "../errors";
 import { HttpServerError } from "../errors";
-import { isHttpClientError } from "../httpClient";
+import { AdapterConfig, HttpClientGetConfig, isHttpClientError } from "../httpClient";
 import { AxiosErrorWithResponse } from "./axios.adapter";
 import {
   ConnectionRefusedError,
@@ -98,3 +98,8 @@ const toAxiosInfrastructureErrorString = (error: any): string =>
     null,
     2,
   );
+
+
+export const deepMergeConfigs = (initialConfig: AdapterConfig, additionalConfig: HttpClientGetConfig): AdapterConfig => {
+  return {...initialConfig, ...additionalConfig.adapterConfig };
+}
