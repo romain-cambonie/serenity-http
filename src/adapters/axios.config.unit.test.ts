@@ -1,6 +1,6 @@
 import { isValidErrorResponse } from "./axios.config";
 
-describe("Error Response format standart", () => {
+describe("Error Response format standard", () => {
   it.each([
     [null, false],
     ["plop", false],
