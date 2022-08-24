@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from "axios";
 import { ConfigurationError } from "./errors";
 import { HttpClientError } from "./errors";
 import { HttpServerError } from "./errors";
@@ -30,6 +31,7 @@ export const isHttpError = (
   error instanceof HttpClientError || error instanceof HttpServerError;
 
 type Http = "http://" | "https://";
+
 export type AbsoluteUrl = `${Http}${string}`;
 
 export const isHttpClientError = (status: number): boolean =>
@@ -53,19 +55,21 @@ export interface HttpResponse {
   status: number;
   statusText: string;
   headers: any;
-  config: any;
+  config: AdapterConfig;
   request?: any;
 }
 
-export type HttpClientPostConfig = {
+export type HttpClientTargetConfig = {
   target: (params: any) => AbsoluteUrl;
   targetParams?: any;
-  data?: string | undefined;
-  adapterConfig?: any;
+  adapterConfig?: AdapterConfig;
 };
 
-export type HttpClientGetConfig = {
-  target: (params: any) => AbsoluteUrl;
-  targetParams?: any;
-  adapterConfig?: any;
+export type HttpClientGetConfig = HttpClientTargetConfig;
+
+export type HttpClientPostConfig = HttpClientTargetConfig & {
+  data?: string | undefined;
 };
+
+// Equivalent to axios AxiosRequestConfig for now but port may change over time
+export type AdapterConfig = AxiosRequestConfig;
