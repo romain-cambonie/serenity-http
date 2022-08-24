@@ -1,17 +1,15 @@
-import { AxiosError } from "axios";
-import { HttpClientError, HttpClientForbiddenError } from "../errors";
-import { HttpServerError } from "../errors";
-import { AdapterConfig, HttpClientGetConfig, isHttpClientError } from "../httpClient";
+import { HttpClientError, HttpClientForbiddenError, HttpServerError } from "../errors";
+import { AdapterConfig, HttpClientTargetConfig, isHttpClientError, isHttpServerError } from "../httpClient";
 import { AxiosErrorWithResponse } from "./axios.adapter";
 import {
+  AxiosInfrastructureError,
+  AxiosInfrastructureErrorCodes,
   ConnectionRefusedError,
   ConnectionResetError,
-  AxiosInfrastructureError,
+  InfrastructureError,
   isAxiosInfrastructureError,
   isTCPWrapperConnectionRefusedError,
   isTCPWrapperConnectionResetError,
-  InfrastructureError,
-  AxiosInfrastructureErrorCodes,
 } from "./errors";
 
 export const toHttpError = (
@@ -22,15 +20,15 @@ export const toHttpError = (
       return new HttpClientForbiddenError(`Forbidden Access`, error);
 
     return new HttpClientError(
-      `4XX Status Code ${toAxiosHttpErrorString(error)}`,
+      `${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`,
       error,
       error.response.status,
     );
   }
 
-  if (isHttpClientError(error.response.status)) {
+  if (isHttpServerError(error.response.status)) {
     return new HttpServerError(
-      `5XX Status Code ${toAxiosHttpErrorString(error)}`,
+      `${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`,
       error,
       error.response.status,
     );
@@ -64,22 +62,53 @@ export const toInfrastructureError = (
     );
 };
 
-const toAxiosHttpErrorString = (error: AxiosError): string =>
-  JSON.stringify(
-    {
-      requestConfig: {
-        url: error.response?.config?.url,
-        headers: error.response?.config?.headers,
-        method: error.response?.config?.method,
-        data: error.response?.config?.data,
-        timeout: error.response?.config?.timeout,
-      },
-      data: error.response?.data,
-      status: error.response?.status,
+// TODO Do better with generic
+/*type PartiallyTypedSerializableAxiosHttpError = {
+  _response: {
+    data: any,
+    status: number,
+    headers: AxiosResponseHeaders,
+    requestConfig: {
+      url: string,
+      headers: AxiosRequestHeaders,
+      method: string,
+      data: any,
+      timeout: number,
     },
-    null,
-    2,
-  );
+    request?: object;
+  }
+};*/
+
+const toSerializableAxiosHttpError = ({
+                                        response,
+                                      }: AxiosErrorWithResponse): object => {
+  const {config, data, status, headers, request} = response;
+
+  const axiosHttpErrorWithoutRequest = {
+    _response: {
+      data,
+      status,
+      headers,
+    },
+    requestConfig: {
+      url: config.url!,
+      headers: config.headers!,
+      method: config.method!,
+      data: config.data!,
+      timeout: config.timeout!,
+    },
+  };
+
+  if (!request) return axiosHttpErrorWithoutRequest;
+
+  // socket, agent, res, _redirectable are keys that cause "cyclic structure" errors.
+  // If needed for debug we may want to further explore them by listing keys and displaying what can be.
+  const {socket, agent, res, _redirectable, ...nonCyclicRequest} = request;
+  return {
+    ...axiosHttpErrorWithoutRequest,
+    request: nonCyclicRequest,
+  };
+};
 
 const toAxiosInfrastructureErrorString = (error: any): string =>
   JSON.stringify(
@@ -99,7 +128,7 @@ const toAxiosInfrastructureErrorString = (error: any): string =>
     2,
   );
 
-
-export const deepMergeConfigs = (initialConfig: AdapterConfig, additionalConfig: HttpClientGetConfig): AdapterConfig => {
-  return {...initialConfig, ...additionalConfig.adapterConfig };
-}
+export const shallowMergeConfigs = (
+  initialConfig: AdapterConfig,
+  additionalConfig: HttpClientTargetConfig,
+): AdapterConfig => ({...initialConfig, ...additionalConfig.adapterConfig});

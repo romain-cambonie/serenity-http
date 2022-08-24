@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from "axios";
 import { ConfigurationError } from "./errors";
 import { HttpClientError } from "./errors";
 import { HttpServerError } from "./errors";
@@ -30,6 +31,7 @@ export const isHttpError = (
   error instanceof HttpClientError || error instanceof HttpServerError;
 
 type Http = "http://" | "https://";
+
 export type AbsoluteUrl = `${Http}${string}`;
 
 export const isHttpClientError = (status: number): boolean =>
@@ -57,58 +59,17 @@ export interface HttpResponse {
   request?: any;
 }
 
-export type HttpClientPostConfig = {
+export type HttpClientTargetConfig = {
   target: (params: any) => AbsoluteUrl;
   targetParams?: any;
+  adapterConfig?: AdapterConfig;
+};
+
+export type HttpClientGetConfig = HttpClientTargetConfig;
+
+export type HttpClientPostConfig = HttpClientTargetConfig & {
   data?: string | undefined;
-  adapterConfig?: AdapterConfig;
 };
 
-export type HttpClientGetConfig = {
-  target: (params: any) => AbsoluteUrl;
-  targetParams?: any;
-  adapterConfig?: AdapterConfig;
-};
-
-type Method =
-  | 'get' | 'GET'
-  | 'delete' | 'DELETE'
-  | 'head' | 'HEAD'
-  | 'options' | 'OPTIONS'
-  | 'post' | 'POST'
-  | 'put' | 'PUT'
-  | 'patch' | 'PATCH'
-  | 'purge' | 'PURGE'
-  | 'link' | 'LINK'
-  | 'unlink' | 'UNLINK';
-
-export type RequestHeaders = Record<string, string | number | boolean>;
-
-
-// TODO Equivalent to axios AxiosRequestConfig for now
-export type AdapterConfig = {
-  url?: string;
-  method?: Method;
-  baseURL?: string;
-  headers?: RequestHeaders;
-  params?: any;
-  paramsSerializer?: (params: any) => string;
-  data?: unknown;
-  timeout?: number;
-  timeoutErrorMessage?: string;
-  withCredentials?: boolean;
-  xsrfCookieName?: string;
-  xsrfHeaderName?: string;
-  onUploadProgress?: (progressEvent: any) => void;
-  onDownloadProgress?: (progressEvent: any) => void;
-  maxContentLength?: number;
-  validateStatus?: ((status: number) => boolean) | null;
-  maxBodyLength?: number;
-  maxRedirects?: number;
-  socketPath?: string | null;
-  httpAgent?: any;
-  httpsAgent?: any;
-  decompress?: boolean;
-  signal?: AbortSignal;
-  insecureHTTPParser?: boolean;
-}
+// Equivalent to axios AxiosRequestConfig for now but port may change over time
+export type AdapterConfig = AxiosRequestConfig;

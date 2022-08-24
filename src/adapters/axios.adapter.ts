@@ -19,7 +19,7 @@ import {
   onFullfilledDefaultResponseInterceptorMaker,
   onRejectDefaultResponseInterceptorMaker,
 } from "./axios.config";
-import { deepMergeConfigs } from "./axios.mappers";
+import { shallowMergeConfigs } from "./axios.mappers";
 
 export type AxiosErrorWithResponse = AxiosError & { response: AxiosResponse };
 
@@ -98,7 +98,7 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
       targetConfig.target,
       this.targetsUrls,
     ) as TargetUrls;
-    const mergedConfigs = deepMergeConfigs(this.defaultRequestConfig, targetConfig);
+    const mergedConfigs = shallowMergeConfigs(this.defaultRequestConfig, targetConfig);
     const context = {
       config: mergedConfigs,
       target,
@@ -116,7 +116,5 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
       onRejectResponseInterceptor,
     };
   };
-
-
 }
 
