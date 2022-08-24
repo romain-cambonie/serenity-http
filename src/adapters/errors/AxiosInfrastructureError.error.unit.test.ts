@@ -1,73 +1,75 @@
 import {
+  AxiosInfrastructureErrorCodes,
   isAxiosInfrastructureError,
   isTCPWrapperConnectionRefusedError,
   isTCPWrapperConnectionResetError,
-} from "./AxiosInfrastructureError.error";
+  TCPWrapperErrorCodes
+} from './AxiosInfrastructureError.error';
 
-describe("AxiosInfrastructureError", () => {
+describe('AxiosInfrastructureError', () => {
   it.each([
-    [{ code: "ECONNREFUSED" }, true],
-    [{ code: "ECONNRESET" }, false],
-    [{ code: "ERR_BAD_OPTION_VALUE" }, false],
-    [{ code: "ERR_BAD_OPTION" }, false],
-    [{ code: "ECONNABORTED" }, false],
-    [{ code: "ETIMEDOUT" }, false],
-    [{ code: "ERR_NETWORK" }, false],
-    [{ code: "ERR_FR_TOO_MANY_REDIRECTS" }, false],
-    [{ code: "ERR_DEPRECATED" }, false],
-    [{ code: "ERR_BAD_RESPONSE" }, false],
-    [{ code: "ERR_BAD_REQUEST" }, false],
-    [{ code: "ERR_CANCELED" }, false],
-    [{ code: "ERR_NOT_SUPPORT" }, false],
-    [{ code: "ERR_INVALID_URL" }, false],
+    [{ code: 'ECONNREFUSED' as const }, true],
+    [{ code: 'ECONNRESET' as const }, false],
+    [{ code: 'ERR_BAD_OPTION_VALUE' as const }, false],
+    [{ code: 'ERR_BAD_OPTION' as const }, false],
+    [{ code: 'ECONNABORTED' as const }, false],
+    [{ code: 'ETIMEDOUT' as const }, false],
+    [{ code: 'ERR_NETWORK' as const }, false],
+    [{ code: 'ERR_FR_TOO_MANY_REDIRECTS' as const }, false],
+    [{ code: 'ERR_DEPRECATED' as const }, false],
+    [{ code: 'ERR_BAD_RESPONSE' as const }, false],
+    [{ code: 'ERR_BAD_REQUEST' as const }, false],
+    [{ code: 'ERR_CANCELED' as const }, false],
+    [{ code: 'ERR_NOT_SUPPORT' as const }, false],
+    [{ code: 'ERR_INVALID_URL' as const }, false]
   ])(
-    "Error is TCP Wrapper Connection Refused, expect: (%s to be %s)",
-    (code: any, expected: boolean) => {
+    'Error is TCP Wrapper Connection Refused, expect: (%s to be %s)',
+    (code: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes }, expected: boolean) => {
       expect(isTCPWrapperConnectionRefusedError(code)).toBe(expected);
-    },
+    }
   );
 
   it.each([
-    [{ code: "ECONNREFUSED" }, false],
-    [{ code: "ECONNRESET" }, true],
-    [{ code: "ERR_BAD_OPTION_VALUE" }, false],
-    [{ code: "ERR_BAD_OPTION" }, false],
-    [{ code: "ECONNABORTED" }, false],
-    [{ code: "ETIMEDOUT" }, false],
-    [{ code: "ERR_NETWORK" }, false],
-    [{ code: "ERR_FR_TOO_MANY_REDIRECTS" }, false],
-    [{ code: "ERR_DEPRECATED" }, false],
-    [{ code: "ERR_BAD_RESPONSE" }, false],
-    [{ code: "ERR_BAD_REQUEST" }, false],
-    [{ code: "ERR_CANCELED" }, false],
-    [{ code: "ERR_NOT_SUPPORT" }, false],
-    [{ code: "ERR_INVALID_URL" }, false],
+    [{ code: 'ECONNREFUSED' as const }, false],
+    [{ code: 'ECONNRESET' as const }, true],
+    [{ code: 'ERR_BAD_OPTION_VALUE' as const }, false],
+    [{ code: 'ERR_BAD_OPTION' as const }, false],
+    [{ code: 'ECONNABORTED' as const }, false],
+    [{ code: 'ETIMEDOUT' as const }, false],
+    [{ code: 'ERR_NETWORK' as const }, false],
+    [{ code: 'ERR_FR_TOO_MANY_REDIRECTS' as const }, false],
+    [{ code: 'ERR_DEPRECATED' as const }, false],
+    [{ code: 'ERR_BAD_RESPONSE' as const }, false],
+    [{ code: 'ERR_BAD_REQUEST' as const }, false],
+    [{ code: 'ERR_CANCELED' as const }, false],
+    [{ code: 'ERR_NOT_SUPPORT' as const }, false],
+    [{ code: 'ERR_INVALID_URL' as const }, false]
   ])(
-    "Error is TCP Wrapper Connection reset, expect: (%s to be %s)",
-    (error: any, expected: boolean) => {
+    'Error is TCP Wrapper Connection reset, expect: (%s to be %s)',
+    (error: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes }, expected: boolean) => {
       expect(isTCPWrapperConnectionResetError(error)).toBe(expected);
-    },
+    }
   );
 
   it.each([
-    [{ code: "ECONNREFUSED" }, false],
-    [{ code: "ECONNRESET" }, false],
-    [{ code: "ERR_BAD_OPTION_VALUE" }, true],
-    [{ code: "ERR_BAD_OPTION" }, true],
-    [{ code: "ECONNABORTED" }, true],
-    [{ code: "ETIMEDOUT" }, true],
-    [{ code: "ERR_NETWORK" }, true],
-    [{ code: "ERR_FR_TOO_MANY_REDIRECTS" }, true],
-    [{ code: "ERR_DEPRECATED" }, true],
-    [{ code: "ERR_BAD_RESPONSE" }, true],
-    [{ code: "ERR_BAD_REQUEST" }, true],
-    [{ code: "ERR_CANCELED" }, true],
-    [{ code: "ERR_NOT_SUPPORT" }, true],
-    [{ code: "ERR_INVALID_URL" }, true],
+    [{ code: 'ECONNREFUSED' as const }, false],
+    [{ code: 'ECONNRESET' as const }, false],
+    [{ code: 'ERR_BAD_OPTION_VALUE' as const }, true],
+    [{ code: 'ERR_BAD_OPTION' as const }, true],
+    [{ code: 'ECONNABORTED' as const }, true],
+    [{ code: 'ETIMEDOUT' as const }, true],
+    [{ code: 'ERR_NETWORK' as const }, true],
+    [{ code: 'ERR_FR_TOO_MANY_REDIRECTS' as const }, true],
+    [{ code: 'ERR_DEPRECATED' as const }, true],
+    [{ code: 'ERR_BAD_RESPONSE' as const }, true],
+    [{ code: 'ERR_BAD_REQUEST' as const }, true],
+    [{ code: 'ERR_CANCELED' as const }, true],
+    [{ code: 'ERR_NOT_SUPPORT' as const }, true],
+    [{ code: 'ERR_INVALID_URL' as const }, true]
   ])(
-    "Error is Axios Infrastructure Error expect: (%s to be %s)",
-    (code: any, expected: boolean) => {
+    'Error is Axios Infrastructure Error expect: (%s to be %s)',
+    (code: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes }, expected: boolean) => {
       expect(isAxiosInfrastructureError(code)).toBe(expected);
-    },
+    }
   );
 });

@@ -1,0 +1,38 @@
+name: zReusable Validation Workflow
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: true
+        type: string
+      package-manager:
+        required: true
+        type: string
+
+jobs:
+  validation:
+    name: ' '
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        command: [lint, prettier, test]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ needs.dynamic-variables.outputs.node-version }}
+          cache: ${{ needs.dynamic-variables.outputs.package-manager }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: ${{matrix.command}}
+        env:
+          COMMAND: ${{matrix.command}}
+        run: ${{ inputs.package-manager }} $COMMAND

@@ -1,1 +1,1 @@
-export * from "./AxiosInfrastructureError.error";
+export * from './AxiosInfrastructureError.error';
