@@ -1,4 +1,4 @@
-name: Validation Workflow
+name: Validation
 
 on:
   workflow_dispatch:

@@ -3,9 +3,10 @@ import { ConfigurationError } from './errors';
 import { HttpClientError } from './errors';
 import { HttpServerError } from './errors';
 
-export interface HttpClient {
+export interface HttpClient<TargetUrls extends string> {
   get: (config: HttpClientGetConfig) => Promise<HttpResponse>;
   post: (config: HttpClientPostConfig) => Promise<HttpResponse>;
+  targetUrls: Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>;
   //get$: (config: HttpClientGetConfig) => Observable<HttpResponse>;
   //post$: (config: HttpClientPostConfig) => Observable<HttpResponse>;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
