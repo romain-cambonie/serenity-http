@@ -19,7 +19,7 @@ describe('httpClient with axios concrete adapter', () => {
       ADRESS_API_ENDPOINT: targetToValidSearchUrl
     };
 
-    const httpClient: HttpClient = new ManagedAxios(targetUrls);
+    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls);
 
     const response: HttpResponse = await httpClient.get({
       target: targetUrls.ADRESS_API_ENDPOINT,
@@ -75,7 +75,7 @@ describe('httpClient with axios concrete adapter', () => {
       ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
     };
 
-    const httpClient: HttpClient = new ManagedAxios(targetUrls);
+    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls);
 
     const responsePromise: Promise<HttpResponse> = httpClient.get({
       target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
@@ -108,7 +108,7 @@ describe('httpClient with axios concrete adapter', () => {
       }
     };
 
-    const httpClient: HttpClient = new ManagedAxios(targetUrls, targetsErrorResponseOverrideMapper);
+    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls, targetsErrorResponseOverrideMapper);
 
     const responsePromise: Promise<HttpResponse> = httpClient.get({
       target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
@@ -128,7 +128,7 @@ describe('httpClient with axios concrete adapter', () => {
       ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
     };
 
-    const httpClient: HttpClient = new ManagedAxios(targetUrls);
+    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls);
 
     const expectedMessage = {
       _response: {

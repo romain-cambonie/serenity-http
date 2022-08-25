@@ -1,12 +1,10 @@
----
 name: Release and publish packages
 
 on:
   workflow_dispatch:
-#  push:
-#    tags:
-#      - 'v*.*.*'
-
+  push:
+    tags:
+      - 'v*.*.*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,11 +16,10 @@ jobs:
       - dependencies
 
     uses: ./.github/workflows/_validation.reusable.yml
-#    with:
-#      cache-path: ${{ needs.dependencies.outputs.pnpm_cache_path }}
-#      cache-key: ${{ needs.dependencies.outputs.pnpm_cache_key }}
-#      node-version: ${{ needs.dependencies.outputs.node-version }}
-
+  #    with:
+  #      cache-path: ${{ needs.dependencies.outputs.pnpm_cache_path }}
+  #      cache-key: ${{ needs.dependencies.outputs.pnpm_cache_key }}
+  #      node-version: ${{ needs.dependencies.outputs.node-version }}
 
   release:
     name: Release
@@ -46,23 +43,23 @@ jobs:
           mkdir dist/cjs-release
           mv README.md dist/whitelist/
           mv LICENSE.md dist/whitelist/
-#         mv package.json dist/whitelist/ TODO Edit main for entrypoint
-#         mv lib/esm/ dist/whitelist/assets/data/
+  #         mv package.json dist/whitelist/ TODO Edit main for entrypoint
+  #         mv lib/esm/ dist/whitelist/assets/data/
 
-#      - name: Upload build artifact
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: build
-#          path: dist
+  #      - name: Upload build artifact
+  #        uses: actions/upload-artifact@v3
+  #        with:
+  #          name: build
+  #          path: dist
 
-#      TODO x2
-#      - name: Zip release
-#        run: zip -r release.zip dist/whitelist/
-#
-#      - name: Publish release on github
-#        uses: softprops/action-gh-release@v1
-#        with:
-#          files: release.zip
+  #      TODO x2
+  #      - name: Zip release
+  #        run: zip -r release.zip dist/whitelist/
+  #
+  #      - name: Publish release on github
+  #        uses: softprops/action-gh-release@v1
+  #        with:
+  #          files: release.zip
 
   publish:
     name: Publish on npm
@@ -77,7 +74,7 @@ jobs:
           always-auth: true
           node-version: '16.x'
           registry-url: https://registry.npmjs.org
-#          scope: '@gouvfr-anct'
+      #          scope: '@gouvfr-anct'
 
       - name: Download build artifact
         uses: actions/download-artifact@v3

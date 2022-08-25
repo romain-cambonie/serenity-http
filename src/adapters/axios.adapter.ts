@@ -28,9 +28,9 @@ export type ContextType<TargetUrls extends string> = {
   errorMapper: ErrorMapper<TargetUrls>;
 };
 
-export class ManagedAxios<TargetUrls extends string> implements HttpClient {
+export class ManagedAxios<TargetUrls extends string> implements HttpClient<TargetUrls> {
   constructor(
-    public readonly targetsUrls: Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>,
+    public readonly targetUrls: Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>,
     private readonly targetsErrorMapper: ErrorMapper<TargetUrls> = {},
     private readonly defaultRequestConfig: AxiosRequestConfig = {},
     private readonly onFulfilledResponseInterceptorMaker: (
@@ -72,7 +72,7 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient {
   }
 
   private clientInstanceContext = (targetConfig: HttpClientGetConfig): AxiosInstanceContext => {
-    const target: TargetUrls = getTargetFromPredicate(targetConfig.target, this.targetsUrls) as TargetUrls;
+    const target: TargetUrls = getTargetFromPredicate(targetConfig.target, this.targetUrls) as TargetUrls;
     const mergedConfigs = shallowMergeConfigs(this.defaultRequestConfig, targetConfig);
     const context = {
       config: mergedConfigs,
