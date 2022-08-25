@@ -1,0 +1,73 @@
+name: Validation Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+      - '!master'
+
+env:
+  node version: '16.x'
+  package-manager: 'yarn'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dynamic-variables:
+    outputs:
+      node-version: ${{ steps.node-version.outputs.value }}
+      package-manager: ${{ steps.package-manager.outputs.value }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Node version from env variable
+        id: node-version
+        run: |
+          NODE_VERSION=${{ env.node-version }}
+          echo "::set-output name=value::$NODE_VERSION"
+
+      - name: Package manager
+        id: package-manager
+        run: |
+          PACKAGE_MANAGER=${{ env.package-manager }}
+          echo "::set-output name=value::$PACKAGE_MANAGER"
+
+  build:
+    runs-on: ubuntu-latest
+    needs:
+      - dynamic-variables
+
+    steps:
+      - name: Checkout client-application repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ needs.dynamic-variables.outputs.node-version }}
+          cache: ${{ needs.dynamic-variables.outputs.package-manager }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: |
+          ${{ needs.dynamic-variables.outputs.package-manager }} build
+
+      - name: Upload build bundle as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-bundle
+          path: |
+            lib
+
+  validation:
+    needs:
+      - dynamic-variables
+    uses: ./.github/workflows/_validation.reusable.yml
+    with:
+      node-version: ${{ needs.dynamic-variables.outputs.node-version }}
+      package-manager: ${{ needs.dynamic-variables.outputs.package-manager }}

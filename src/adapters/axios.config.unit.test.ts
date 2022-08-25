@@ -1,46 +1,47 @@
-import { isValidErrorResponse } from "./axios.config";
+import { AxiosResponse } from 'axios';
+import { isValidErrorResponse } from './axios.config';
 
-describe("Error Response format standard", () => {
+describe('Error Response format standard', () => {
   it.each([
     [null, false],
-    ["plop", false],
+    ['plop', false],
     [{}, false],
     [
       {
-        request: { status: "plop" },
+        request: { status: 'plop' }
       },
-      false,
+      false
     ],
     [[], false],
     [[{}], false],
     [{}, false],
     [
       {
-        data: "",
-        status: 400,
+        data: '',
+        status: 400
       },
-      false,
+      false
     ],
     [
       {
-        data: "plop",
-        status: 400,
+        data: 'plop',
+        status: 400
       },
-      true,
+      true
     ],
     [
       {
         data: {
-          prop: "A nested property",
+          prop: 'A nested property'
         },
-        status: 400,
+        status: 400
       },
-      true,
-    ],
+      true
+    ]
   ])(
-    "isAxiosResponse should detect if the response has a valid response structure code, expect: (%s to be %s)",
-    (raw: any, expected: boolean) => {
-      expect(isValidErrorResponse(raw)).toBe(expected);
-    },
+    'isAxiosResponse should detect if the response has a valid response structure code, expect: (%s to be %s)',
+    (raw: null | string | object, expected: boolean) => {
+      expect(isValidErrorResponse(raw as AxiosResponse)).toBe(expected);
+    }
   );
 });

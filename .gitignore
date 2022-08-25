@@ -1,2 +1,9 @@
+# IDE and system
+.DS_Store
 .idea
+
+# Packages manager
 node_modules
+
+# Build artifacts
+lib
