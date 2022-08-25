@@ -1,148 +1,131 @@
-import { HttpClientError } from "../errors";
+import { HttpClientError } from '../errors';
 
-import {
-  AbsoluteUrl,
-  ErrorMapper,
-  HttpClient,
-  HttpResponse,
-  TargetUrlsMapper,
-} from "../httpClient";
-import { ManagedAxios } from "./axios.adapter";
+import { AbsoluteUrl, ErrorMapper, HttpClient, HttpResponse, TargetParams, TargetUrlsMapper } from '../httpClient';
+import { ManagedAxios } from './axios.adapter';
 
-describe("httpClient with axios concrete adapter", () => {
-  const targetToValidSearchUrl = (rawQueryString: string): AbsoluteUrl =>
-    `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(
-      rawQueryString,
-    )}&limit=1`;
+describe('httpClient with axios concrete adapter', () => {
+  const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+    `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;
 
-  it("expect user defined function to produce absolute url", () => {
-    expect(targetToValidSearchUrl("18 avenue des Canuts 69120")).toBe(
-      `https://api-adresse.data.gouv.fr/search/?q=18%20avenue%20des%20Canuts%2069120&limit=1`,
+  it('expect user defined function to produce absolute url', () => {
+    expect(targetToValidSearchUrl('18 avenue des Canuts 69120')).toBe(
+      `https://api-adresse.data.gouv.fr/search/?q=18%20avenue%20des%20Canuts%2069120&limit=1`
     );
   });
 
-  it("should call API Adresse and return 200 with data", async () => {
-
-    type TargetUrls = "ADRESS_API_ENDPOINT";
+  it('should call API Adresse and return 200 with data', async () => {
+    type TargetUrls = 'ADRESS_API_ENDPOINT';
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADRESS_API_ENDPOINT: targetToValidSearchUrl,
+      ADRESS_API_ENDPOINT: targetToValidSearchUrl
     };
 
     const httpClient: HttpClient = new ManagedAxios(targetUrls);
 
     const response: HttpResponse = await httpClient.get({
       target: targetUrls.ADRESS_API_ENDPOINT,
-      targetParams: "18 avenue des Canuts 69120",
+      targetParams: '18 avenue des Canuts 69120'
     });
 
     const expectedStatus = 200;
     const expectedData = {
-      attribution: "BAN",
+      attribution: 'BAN',
       features: [
         {
           geometry: {
             coordinates: [4.923847, 45.761134],
-            type: "Point",
+            type: 'Point'
           },
           properties: {
-            city: "Vaulx-en-Velin",
-            citycode: "69256",
-            context: "69, Rhône, Auvergne-Rhône-Alpes",
-            housenumber: "18",
-            id: "69256_0227_00018",
+            city: 'Vaulx-en-Velin',
+            citycode: '69256',
+            context: '69, Rhône, Auvergne-Rhône-Alpes',
+            housenumber: '18',
+            id: '69256_0227_00018',
             importance: 0.62418,
-            label: "18 Avenue des Canuts 69120 Vaulx-en-Velin",
-            name: "18 Avenue des Canuts",
-            postcode: "69120",
+            label: '18 Avenue des Canuts 69120 Vaulx-en-Velin',
+            name: '18 Avenue des Canuts',
+            postcode: '69120',
             score: 0.8749254545454545,
-            street: "Avenue des Canuts",
-            type: "housenumber",
+            street: 'Avenue des Canuts',
+            type: 'housenumber',
             x: 849523.68,
-            y: 6519769.27,
+            y: 6519769.27
           },
-          type: "Feature",
-        },
+          type: 'Feature'
+        }
       ],
-      licence: "ETALAB-2.0",
+      licence: 'ETALAB-2.0',
       limit: 1,
-      query: "18 avenue des Canuts 69120",
-      type: "FeatureCollection",
-      version: "draft",
+      query: '18 avenue des Canuts 69120',
+      type: 'FeatureCollection',
+      version: 'draft'
     };
 
     expect(response.status).toBe(expectedStatus);
     expect(response.data).toStrictEqual(expectedData);
   });
 
-  it("should call API Adresse with invalid address and throw HttpClientError", async () => {
-    type TargetUrls = "ADDRESS_API_SEARCH_ENDPOINT";
+  it('should call API Adresse with invalid address and throw HttpClientError', async () => {
+    type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (rawQueryString: string): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString}&limit=1`;
+    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
 
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl,
+      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
     };
 
     const httpClient: HttpClient = new ManagedAxios(targetUrls);
 
     const responsePromise: Promise<HttpResponse> = httpClient.get({
       target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
-      targetParams: "18 avenue des Canuts 69120",
+      targetParams: '18 avenue des Canuts 69120'
     });
 
     await expect(responsePromise).rejects.toThrow(HttpClientError);
   });
 
-  it("should call API Adresse with invalid address and throw remapped CustomError", async () => {
+  it('should call API Adresse with invalid address and throw remapped CustomError', async () => {
     class CustomError extends Error {
       constructor(message: string, cause?: Error) {
         super(message, { cause });
       }
     }
 
-    type TargetUrls = "ADDRESS_API_SEARCH_ENDPOINT";
+    type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (rawQueryString: string): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString}&limit=1`;
+    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
 
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl,
+      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
     };
 
     const targetsErrorResponseOverrideMapper: ErrorMapper<TargetUrls> = {
       ADDRESS_API_SEARCH_ENDPOINT: {
-        HttpClientError: (error) =>
-          new CustomError("You have an invalid url you dummy dum dum !", error),
-        HttpServerError: (error) =>
-          new Error(
-            "You have an invalid url HttpServerError you dummy dum dum !",
-            error,
-          ),
-      },
+        HttpClientError: (error) => new CustomError('You have an invalid url you dummy dum dum !', error),
+        HttpServerError: (error) => new Error('You have an invalid url HttpServerError you dummy dum dum !', error)
+      }
     };
 
-    const httpClient: HttpClient = new ManagedAxios(
-      targetUrls,
-      targetsErrorResponseOverrideMapper,
-    );
+    const httpClient: HttpClient = new ManagedAxios(targetUrls, targetsErrorResponseOverrideMapper);
 
     const responsePromise: Promise<HttpResponse> = httpClient.get({
       target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
-      targetParams: "18 avenue des Canuts 69120",
+      targetParams: '18 avenue des Canuts 69120'
     });
 
     await expect(responsePromise).rejects.toThrow(CustomError);
   });
 
-  it("Error log should contain enough info to help debug", async () => {
-    type TargetUrls = "ADDRESS_API_SEARCH_ENDPOINT";
+  it('Error log should contain enough info to help debug', async () => {
+    type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (rawQueryString: string): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString}&limit=1`;
+    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
 
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl,
+      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
     };
 
     const httpClient: HttpClient = new ManagedAxios(targetUrls);
@@ -150,40 +133,42 @@ describe("httpClient with axios concrete adapter", () => {
     const expectedMessage = {
       _response: {
         data: {
-          title: "Missing query",
-          description: "Missing query",
+          title: 'Missing query',
+          description: 'Missing query'
         },
         status: 400,
         headers: {
           server: expect.any(String),
           date: expect.any(String),
-          "content-type": "application/json; charset=UTF-8",
-          "content-length": "58",
-          connection: "close",
-          vary: "Accept",
-        },
+          'content-type': 'application/json; charset=UTF-8',
+          'content-length': '58',
+          connection: 'close',
+          vary: 'Accept'
+        }
       },
       requestConfig: {
-        url: "https://api-adresse.data.gouv.fr/search/?d=18 avenue des Canuts 69120&limit=1",
+        url: 'https://api-adresse.data.gouv.fr/search/?d=18 avenue des Canuts 69120&limit=1',
         headers: {
-          Accept: "application/json, text/plain, */*",
-          "User-Agent": "axios/0.26.1",
+          Accept: 'application/json, text/plain, */*',
+          'User-Agent': 'axios/0.26.1'
         },
-        method: "get",
-        timeout: 0,
+        method: 'get',
+        timeout: 0
       },
-      request: expect.any(Object),
+      request: expect.any(Object)
     };
 
     try {
       await httpClient.get({
         target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
-        targetParams: "18 avenue des Canuts 69120",
+        targetParams: '18 avenue des Canuts 69120'
       });
-      fail("should have thrown HttpCLientError");
+      throw new Error('should have thrown HttpCLientError');
     } catch (error) {
+      // eslint-disable-next-line jest/no-conditional-expect
       expect(JSON.parse((error as Error).message)).toMatchObject(
-        expect.objectContaining(expectedMessage),
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect.objectContaining(expectedMessage)
       );
     }
   });

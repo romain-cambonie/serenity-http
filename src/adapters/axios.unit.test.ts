@@ -1,33 +1,33 @@
-import axios from "axios";
+import axios from 'axios';
 
-describe("Error Response format", () => {
+describe('Error Response format', () => {
   it.each([
     [{ response: {} }, false],
     [
       {
-        isAxiosError: false,
+        isAxiosError: false
       },
-      false,
+      false
     ],
     [
       {
-        isAxiosError: true,
+        isAxiosError: true
       },
-      true,
+      true
     ],
     [
       {
         response: {
-          status: 400,
+          status: 400
         },
-        isAxiosError: true,
+        isAxiosError: true
       },
-      true,
-    ],
+      true
+    ]
   ])(
-    "isAxiosError should detect if the response has a valid format, expect: (%s to be %s)",
-    (raw: any, expected: boolean) => {
+    'isAxiosError should detect if the response has a valid format, expect: (%s to be %s)',
+    (raw: object, expected: boolean) => {
       expect(axios.isAxiosError(raw)).toBe(expected);
-    },
+    }
   );
 });
