@@ -24,7 +24,10 @@ describe('AxiosInfrastructureError', () => {
     [{ code: 'ERR_INVALID_URL' as const }, false]
   ])(
     'Error is TCP Wrapper Connection Refused, expect: (%s to be %s)',
-    (code: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes }, expected: boolean) => {
+    (
+      code: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes },
+      expected: boolean
+    ) => {
       expect(isTCPWrapperConnectionRefusedError(code)).toBe(expected);
     }
   );
@@ -46,7 +49,10 @@ describe('AxiosInfrastructureError', () => {
     [{ code: 'ERR_INVALID_URL' as const }, false]
   ])(
     'Error is TCP Wrapper Connection reset, expect: (%s to be %s)',
-    (error: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes }, expected: boolean) => {
+    (
+      error: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes },
+      expected: boolean
+    ) => {
       expect(isTCPWrapperConnectionResetError(error)).toBe(expected);
     }
   );
@@ -68,7 +74,10 @@ describe('AxiosInfrastructureError', () => {
     [{ code: 'ERR_INVALID_URL' as const }, true]
   ])(
     'Error is Axios Infrastructure Error expect: (%s to be %s)',
-    (code: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes }, expected: boolean) => {
+    (
+      code: { code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes },
+      expected: boolean
+    ) => {
       expect(isAxiosInfrastructureError(code)).toBe(expected);
     }
   );

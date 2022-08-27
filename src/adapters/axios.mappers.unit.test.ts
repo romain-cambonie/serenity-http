@@ -1,7 +1,7 @@
-import { AxiosRequestHeaders, AxiosResponse } from 'axios';
+import type { AxiosRequestHeaders, AxiosResponse } from 'axios';
 import { HttpClientError, HttpServerError } from '../errors';
-import { AdapterConfig, HttpClientTargetConfig } from '../httpClient';
-import { AxiosErrorWithResponse } from './axios.adapter';
+import type { AdapterConfig, HttpClientTargetConfig } from '../httpClient';
+import type { AxiosErrorWithResponse } from './axios.adapter';
 import { shallowMergeConfigs, toHttpError } from './axios.mappers';
 
 describe('Errors', () => {
@@ -12,7 +12,10 @@ describe('Errors', () => {
     [{ status: 503 }, HttpServerError]
   ])(
     'should return %s if status code is %d',
-    (status: { status: number }, expected: typeof HttpClientError | HttpServerError) => {
+    (
+      status: { status: number },
+      expected: typeof HttpClientError | HttpServerError
+    ) => {
       const dummy: AxiosErrorWithResponse = {
         config: {},
         isAxiosError: true,
@@ -68,6 +71,8 @@ describe('Configurations', () => {
       timeoutErrorMessage: 'PLOP'
     };
 
-    expect(shallowMergeConfigs(defaultConfig, targetSpecificConfig)).toStrictEqual(expected);
+    expect(
+      shallowMergeConfigs(defaultConfig, targetSpecificConfig)
+    ).toStrictEqual(expected);
   });
 });
