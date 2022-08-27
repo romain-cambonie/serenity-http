@@ -1,6 +1,15 @@
-import { HttpClientError, HttpClientForbiddenError, HttpServerError } from '../errors';
-import { AdapterConfig, HttpClientTargetConfig, isHttpClientError, isHttpServerError } from '../httpClient';
-import { AxiosErrorWithResponse } from './axios.adapter';
+import {
+  HttpClientError,
+  HttpClientForbiddenError,
+  HttpServerError
+} from '../errors';
+import {
+  AdapterConfig,
+  HttpClientTargetConfig,
+  isHttpClientError,
+  isHttpServerError
+} from '../httpClient';
+import type { AxiosErrorWithResponse } from './axios.adapter';
 import {
   AxiosInfrastructureError,
   AxiosInfrastructureErrorCodes,
@@ -12,21 +21,41 @@ import {
   isTCPWrapperConnectionResetError
 } from './errors';
 
-export const toHttpError = (error: AxiosErrorWithResponse): HttpClientError | HttpServerError | undefined => {
+export const toHttpError = (
+  error: AxiosErrorWithResponse
+): HttpClientError | HttpServerError | undefined => {
   if (isHttpClientError(error.response.status)) {
-    if (error.response.status === 401) return new HttpClientForbiddenError(`Forbidden Access`, error);
+    if (error.response.status === 401)
+      return new HttpClientForbiddenError(`Forbidden Access`, error);
 
-    return new HttpClientError(`${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`, error, error.response.status);
+    return new HttpClientError(
+      `${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`,
+      error,
+      error.response.status
+    );
   }
 
   if (isHttpServerError(error.response.status)) {
-    return new HttpServerError(`${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`, error, error.response.status);
+    return new HttpServerError(
+      `${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`,
+      error,
+      error.response.status
+    );
   }
+
+  return;
 };
 
-export const toInfrastructureError = (error: Error): InfrastructureError | undefined => {
+export const toInfrastructureError = (
+  error: Error
+): InfrastructureError | undefined => {
   if (isTCPWrapperConnectionRefusedError(error))
-    return new ConnectionRefusedError(`Could not connect to server : ${toAxiosInfrastructureErrorString(error)}`, error);
+    return new ConnectionRefusedError(
+      `Could not connect to server : ${toAxiosInfrastructureErrorString(
+        error
+      )}`,
+      error
+    );
 
   if (isTCPWrapperConnectionResetError(error))
     return new ConnectionResetError(
@@ -42,6 +71,8 @@ export const toInfrastructureError = (error: Error): InfrastructureError | undef
       error,
       (error as unknown as { code: AxiosInfrastructureErrorCodes }).code
     );
+
+  return;
 };
 
 // TODO Do better with generic
@@ -62,7 +93,9 @@ export const toInfrastructureError = (error: Error): InfrastructureError | undef
 };*/
 
 // TODO object should be forbidden, to type better
-const toSerializableAxiosHttpError = ({ response }: AxiosErrorWithResponse): object => {
+const toSerializableAxiosHttpError = ({
+  response
+}: AxiosErrorWithResponse): object => {
   const { config, data, status, headers, request } = response;
 
   const axiosHttpErrorWithoutRequest = {
@@ -125,7 +158,10 @@ const toAxiosInfrastructureErrorString = (error: unknown): string => {
   );
 };
 
-export const shallowMergeConfigs = (initialConfig: AdapterConfig, additionalConfig: HttpClientTargetConfig): AdapterConfig => ({
+export const shallowMergeConfigs = (
+  initialConfig: AdapterConfig,
+  additionalConfig: HttpClientTargetConfig
+): AdapterConfig => ({
   ...initialConfig,
   ...additionalConfig.adapterConfig
 });

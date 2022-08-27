@@ -1,4 +1,9 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
 
 import {
   AbsoluteUrl,
@@ -11,7 +16,10 @@ import {
   TargetParams
 } from '../httpClient';
 
-import { onFullfilledDefaultResponseInterceptorMaker, onRejectDefaultResponseInterceptorMaker } from './axios.config';
+import {
+  onFullfilledDefaultResponseInterceptorMaker,
+  onRejectDefaultResponseInterceptorMaker
+} from './axios.config';
 import { shallowMergeConfigs } from './axios.mappers';
 
 export type AxiosErrorWithResponse = AxiosError & { response: AxiosResponse };
@@ -28,30 +36,47 @@ export type ContextType<TargetUrls extends string> = {
   errorMapper: ErrorMapper<TargetUrls>;
 };
 
-export class ManagedAxios<TargetUrls extends string> implements HttpClient<TargetUrls> {
+export class ManagedAxios<TargetUrls extends string>
+  implements HttpClient<TargetUrls>
+{
   constructor(
-    public readonly targetUrls: Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>,
+    public readonly targetUrls: Record<
+      TargetUrls,
+      (params?: TargetParams) => AbsoluteUrl
+    >,
     private readonly targetsErrorMapper: ErrorMapper<TargetUrls> = {},
     private readonly defaultRequestConfig: AxiosRequestConfig = {},
     private readonly onFulfilledResponseInterceptorMaker: (
       context: ContextType<TargetUrls>
-    ) => (response: AxiosResponse) => AxiosResponse = onFullfilledDefaultResponseInterceptorMaker,
+    ) => (
+      response: AxiosResponse
+    ) => AxiosResponse = onFullfilledDefaultResponseInterceptorMaker,
     private readonly onRejectResponseInterceptorMaker: (
       context: ContextType<TargetUrls>
-    ) => (rawAxiosError: AxiosError) => never = onRejectDefaultResponseInterceptorMaker
+    ) => (
+      rawAxiosError: AxiosError
+    ) => never = onRejectDefaultResponseInterceptorMaker
   ) {}
 
-  private static workerInstance = (context: AxiosInstanceContext): AxiosInstance => {
+  private static workerInstance = (
+    context: AxiosInstanceContext
+  ): AxiosInstance => {
     const axiosInstance = axios.create(context.axiosRequestConfig);
 
-    axiosInstance.interceptors.response.use(context.onFulfilledResponseInterceptor, context.onRejectResponseInterceptor);
+    axiosInstance.interceptors.response.use(
+      context.onFulfilledResponseInterceptor,
+      context.onRejectResponseInterceptor
+    );
 
     return axiosInstance;
   };
 
   async get(config: HttpClientGetConfig): Promise<HttpResponse> {
-    const { axiosRequestConfig, onFulfilledResponseInterceptor, onRejectResponseInterceptor } =
-      this.clientInstanceContext(config);
+    const {
+      axiosRequestConfig,
+      onFulfilledResponseInterceptor,
+      onRejectResponseInterceptor
+    } = this.clientInstanceContext(config);
 
     return ManagedAxios.workerInstance({
       axiosRequestConfig,
@@ -61,8 +86,11 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient<Targe
   }
 
   async post(config: HttpClientPostConfig): Promise<HttpResponse> {
-    const { axiosRequestConfig, onFulfilledResponseInterceptor, onRejectResponseInterceptor } =
-      this.clientInstanceContext(config);
+    const {
+      axiosRequestConfig,
+      onFulfilledResponseInterceptor,
+      onRejectResponseInterceptor
+    } = this.clientInstanceContext(config);
 
     return ManagedAxios.workerInstance({
       axiosRequestConfig,
@@ -71,17 +99,27 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient<Targe
     }).post(config.target(config.targetParams), config.data);
   }
 
-  private clientInstanceContext = (targetConfig: HttpClientGetConfig): AxiosInstanceContext => {
-    const target: TargetUrls = getTargetFromPredicate(targetConfig.target, this.targetUrls) as TargetUrls;
-    const mergedConfigs = shallowMergeConfigs(this.defaultRequestConfig, targetConfig);
+  private clientInstanceContext = (
+    targetConfig: HttpClientGetConfig
+  ): AxiosInstanceContext => {
+    const target: TargetUrls = getTargetFromPredicate(
+      targetConfig.target,
+      this.targetUrls
+    ) as TargetUrls;
+    const mergedConfigs = shallowMergeConfigs(
+      this.defaultRequestConfig,
+      targetConfig
+    );
     const context = {
       config: mergedConfigs,
       target,
       errorMapper: this.targetsErrorMapper
     };
 
-    const onFulfilledResponseInterceptor = this.onFulfilledResponseInterceptorMaker(context);
-    const onRejectResponseInterceptor = this.onRejectResponseInterceptorMaker(context);
+    const onFulfilledResponseInterceptor =
+      this.onFulfilledResponseInterceptorMaker(context);
+    const onRejectResponseInterceptor =
+      this.onRejectResponseInterceptorMaker(context);
 
     return {
       axiosRequestConfig: mergedConfigs,
