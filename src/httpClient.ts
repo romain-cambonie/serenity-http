@@ -19,24 +19,35 @@ export const getTargetFromPredicate = (
   predicate: (params?: TargetParams) => AbsoluteUrl,
   targetsUrls: Record<string, (params?: TargetParams) => AbsoluteUrl>
 ): string | never => {
-  const target: string | undefined = Object.keys(targetsUrls).find((targetsUrlKey) => targetsUrls[targetsUrlKey] === predicate);
+  const target: string | undefined = Object.keys(targetsUrls).find(
+    (targetsUrlKey) => targetsUrls[targetsUrlKey] === predicate
+  );
   if (!target)
-    throw new ConfigurationError('Invalid configuration: This target predicate does not match any registered target');
+    throw new ConfigurationError(
+      'Invalid configuration: This target predicate does not match any registered target'
+    );
   return target;
 };
 
-export const isHttpError = (error: unknown): error is HttpClientError | HttpServerError =>
+export const isHttpError = (
+  error: unknown
+): error is HttpClientError | HttpServerError =>
   error instanceof HttpClientError || error instanceof HttpServerError;
 
 type Http = 'http://' | 'https://';
 
 export type AbsoluteUrl = `${Http}${string}`;
 
-export const isHttpClientError = (status: number): boolean => status >= 400 && status < 500;
+export const isHttpClientError = (status: number): boolean =>
+  status >= 400 && status < 500;
 
-export const isHttpServerError = (status: number): boolean => status >= 500 && status < 600;
+export const isHttpServerError = (status: number): boolean =>
+  status >= 500 && status < 600;
 
-export type TargetUrlsMapper<TargetUrls extends string> = Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>;
+export type TargetUrlsMapper<TargetUrls extends string> = Record<
+  TargetUrls,
+  (params?: TargetParams) => AbsoluteUrl
+>;
 
 export type ErrorMapper<TargetUrls extends string> = Partial<
   Record<TargetUrls, Partial<Record<string, (error: Error) => Error>>>
@@ -61,7 +72,7 @@ export type HttpClientTargetConfig = {
 export type HttpClientGetConfig = HttpClientTargetConfig;
 
 export type HttpClientPostConfig = HttpClientTargetConfig & {
-  data?: string | undefined;
+  data?: string | object;
 };
 
 // Equivalent to axios AxiosRequestConfig for now but port may change over time

@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import { isValidErrorResponse } from './axios.config';
 
 describe('Error Response format standard', () => {
@@ -20,7 +20,7 @@ describe('Error Response format standard', () => {
         data: '',
         status: 400
       },
-      false
+      true
     ],
     [
       {
