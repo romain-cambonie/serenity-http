@@ -1,5 +1,6 @@
 name: Validation
 
+# TODO Limit to prefixed branches
 on:
   workflow_dispatch:
   push:
@@ -7,33 +8,30 @@ on:
       - '**'
       - '!master'
 
-env:
-  node version: '16.x'
-  package-manager: 'yarn'
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  node version: '16.x'
+  package-manager: 'yarn'
+  package-manager-dependencies-command: 'yarn install --frozen-lockfile'
+
 jobs:
   dynamic-variables:
     outputs:
-      node-version: ${{ steps.node-version.outputs.value }}
-      package-manager: ${{ steps.package-manager.outputs.value }}
+      node-version: ${{ steps.variables.outputs.node-version }}
+      package-manager: ${{ steps.variables.outputs.package-manager }}
+      package-manager-dependencies-command: ${{ steps.variables.outputs.package-manager-dependencies-command }}
 
     runs-on: ubuntu-latest
     steps:
-      - name: Node version from env variable
-        id: node-version
+      - name: Interpolated variables from env variables
+        id: variables
         run: |
-          NODE_VERSION=${{ env.node-version }}
-          echo "::set-output name=value::$NODE_VERSION"
-
-      - name: Package manager
-        id: package-manager
-        run: |
-          PACKAGE_MANAGER=${{ env.package-manager }}
-          echo "::set-output name=value::$PACKAGE_MANAGER"
+          echo "::set-output name=node-version::${{ env.node-version }}"
+          echo "::set-output name=package-manager::${{ env.package-manager }}"
+          echo "::set-output name=package-manager-dependencies-command::${{ env.package-manager-dependencies-command }}"
 
   build:
     runs-on: ubuntu-latest
@@ -50,8 +48,8 @@ jobs:
           node-version: ${{ needs.dynamic-variables.outputs.node-version }}
           cache: ${{ needs.dynamic-variables.outputs.package-manager }}
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Install frozen dependencies
+        run: ${{ needs.dynamic-variables.outputs.package-manager-dependencies-command }}
 
       - name: Build
         run: |
@@ -71,3 +69,4 @@ jobs:
     with:
       node-version: ${{ needs.dynamic-variables.outputs.node-version }}
       package-manager: ${{ needs.dynamic-variables.outputs.package-manager }}
+      package-manager-dependencies-command: ${{ needs.dynamic-variables.outputs.package-manager-dependencies-command }}
