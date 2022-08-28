@@ -1,6 +1,6 @@
 name: Validation
 
-# TODO Limit to prefixed branches
+# TODO Limit to prefixed branches, ignore tagged branch or setup output to make release and publish trigger it
 on:
   workflow_dispatch:
   push:
