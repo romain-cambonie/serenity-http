@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+
 import {
   AbsoluteUrl,
   getTargetFromPredicate,
@@ -7,7 +9,7 @@ import {
   TargetUrlsMapper
 } from './httpClient';
 
-describe('Http Client Errors', () => {
+describe('Http Client Errors', (): void => {
   it.each([
     [100, false],
     [308, false],
@@ -19,13 +21,13 @@ describe('Http Client Errors', () => {
     [502, false]
   ])(
     'isHttpClientErrorStatus should detect HttpClient 4XX errors, expect: (%i to be %s)',
-    (httpStatusCode: number, expected: boolean) => {
+    (httpStatusCode: number, expected: boolean): void => {
       expect(isHttpClientError(httpStatusCode)).toBe(expected);
     }
   );
 });
 
-describe('Http Server Errors', () => {
+describe('Http Server Errors', (): void => {
   it.each([
     [100, false],
     [308, false],
@@ -39,15 +41,15 @@ describe('Http Server Errors', () => {
     [600, false]
   ])(
     'isHttpServerErrorStatus should detect Http Server 5XX errors, expect: (%i to be %s)',
-    (httpStatusCode: number, expected: boolean) => {
+    (httpStatusCode: number, expected: boolean): void => {
       expect(isHttpServerError(httpStatusCode)).toBe(expected);
     }
   );
 });
 
-describe('find target from callback', () => {
-  it('getTargetFromPredicate should return', () => {
-    type TargetUrls = 'ADDRESS_API_SEARCH' | 'ADDRESS_API_GEOLOCATE';
+describe('find target from callback', (): void => {
+  it('getTargetFromPredicate should return', (): void => {
+    type TargetUrls = 'ADDRESS_API_GEOLOCATE' | 'ADDRESS_API_SEARCH';
 
     const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
       `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;

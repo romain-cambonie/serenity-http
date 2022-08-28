@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+
 export class HttpClientError extends Error {
   constructor(
     public override readonly message: string,

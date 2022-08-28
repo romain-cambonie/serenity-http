@@ -1,29 +1,26 @@
 import type { AxiosRequestConfig, AxiosResponseHeaders } from 'axios';
-import { ConfigurationError } from './errors';
-import { HttpClientError } from './errors';
-import { HttpServerError } from './errors';
+import { ConfigurationError, HttpClientError, HttpServerError } from './errors';
 
 export interface HttpClient<TargetUrls extends string> {
   get: (config: HttpClientGetConfig) => Promise<HttpResponse>;
   post: (config: HttpClientPostConfig) => Promise<HttpResponse>;
   targetUrls: Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>;
-  /*
-   * get$: (config: HttpClientGetConfig) => Observable<HttpResponse>;
-   * post$: (config: HttpClientPostConfig) => Observable<HttpResponse>;
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 }
 
 // TODO Do better with a generic
-export type TargetParams = number | string | object;
+export type TargetParams = number | object | string;
 
 export const getTargetFromPredicate = (
   predicate: (params?: TargetParams) => AbsoluteUrl,
   targetsUrls: Record<string, (params?: TargetParams) => AbsoluteUrl>
-): string | never => {
-  const target: string | undefined = Object.keys(targetsUrls).find((targetsUrlKey) => targetsUrls[targetsUrlKey] === predicate);
-  if (!target)
+): never | string => {
+  const target: string | undefined = Object.keys(targetsUrls).find(
+    (targetsUrlKey: string): boolean => targetsUrls[targetsUrlKey] === predicate
+  );
+
+  if (target === undefined)
     throw new ConfigurationError('Invalid configuration: This target predicate does not match any registered target');
+
   return target;
 };
 
@@ -34,9 +31,9 @@ type Http = 'http://' | 'https://';
 
 export type AbsoluteUrl = `${Http}${string}`;
 
-export const isHttpClientError = (status: number): boolean => status >= 400 && status < 500;
+export const isHttpClientError = (httpStatusCode: number): boolean => httpStatusCode >= 400 && httpStatusCode < 500;
 
-export const isHttpServerError = (status: number): boolean => status >= 500 && status < 600;
+export const isHttpServerError = (httpStatusCode: number): boolean => httpStatusCode >= 500 && httpStatusCode < 600;
 
 export type TargetUrlsMapper<TargetUrls extends string> = Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>;
 
@@ -54,16 +51,16 @@ export interface HttpResponse {
   request?: object; // TODO To type better
 }
 
-export type HttpClientTargetConfig = {
+export interface HttpClientTargetConfig {
   target: (params?: TargetParams) => AbsoluteUrl;
   targetParams?: TargetParams;
   adapterConfig?: AdapterConfig;
-};
+}
 
 export type HttpClientGetConfig = HttpClientTargetConfig;
 
 export type HttpClientPostConfig = HttpClientTargetConfig & {
-  data?: string | object;
+  data?: object | string;
 };
 
 // Equivalent to axios AxiosRequestConfig for now but port may change over time

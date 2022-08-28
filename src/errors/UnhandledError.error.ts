@@ -1,5 +1,5 @@
 export class UnhandledError extends Error {
-  constructor(public override readonly message: string = 'Unhandled Error', public readonly cause: Error) {
+  constructor(public override readonly message: string, public readonly cause: Error) {
     super();
     /*
      *  TODO Standard way to get the stacktrace ?

@@ -2,17 +2,17 @@ import { HttpClientError } from '../errors';
 import type { AbsoluteUrl, ErrorMapper, HttpClient, HttpResponse, TargetParams, TargetUrlsMapper } from '../httpClient';
 import { ManagedAxios } from './axios.adapter';
 
-describe('httpClient with axios concrete adapter', () => {
+describe('httpClient with axios concrete adapter', (): void => {
   const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
     `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;
 
-  it('expect user defined function to produce absolute url', () => {
+  it('expect user defined function to produce absolute url', (): void => {
     expect(targetToValidSearchUrl('18 avenue des Canuts 69120')).toBe(
       `https://api-adresse.data.gouv.fr/search/?q=18%20avenue%20des%20Canuts%2069120&limit=1`
     );
   });
 
-  it('should call API Adresse and return 200 with data', async () => {
+  it('should call API Adresse and return 200 with data', async (): Promise<void> => {
     type TargetUrls = 'ADRESS_API_ENDPOINT';
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
       ADRESS_API_ENDPOINT: targetToValidSearchUrl
@@ -25,8 +25,8 @@ describe('httpClient with axios concrete adapter', () => {
       targetParams: '18 avenue des Canuts 69120'
     });
 
-    const expectedStatus = 200;
-    const expectedData = {
+    const expectedStatus: number = 200;
+    const expectedData: object = {
       attribution: 'BAN',
       features: [
         {
@@ -64,7 +64,7 @@ describe('httpClient with axios concrete adapter', () => {
     expect(response.data).toStrictEqual(expectedData);
   });
 
-  it('should call API Adresse with invalid address and throw HttpClientError', async () => {
+  it('should call API Adresse with invalid address and throw HttpClientError', async (): Promise<void> => {
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
     const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
@@ -84,12 +84,8 @@ describe('httpClient with axios concrete adapter', () => {
     await expect(responsePromise).rejects.toThrow(HttpClientError);
   });
 
-  it('should call API Adresse with invalid address and throw remapped CustomError', async () => {
-    class CustomError extends Error {
-      constructor(message: string) {
-        super(message);
-      }
-    }
+  it('should call API Adresse with invalid address and throw remapped CustomError', async (): Promise<void> => {
+    class CustomError extends Error {}
 
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
@@ -102,8 +98,10 @@ describe('httpClient with axios concrete adapter', () => {
 
     const targetsErrorResponseOverrideMapper: ErrorMapper<TargetUrls> = {
       ADDRESS_API_SEARCH_ENDPOINT: {
-        HttpClientError: (error) => new CustomError(`You have an invalid url you dummy dum dum ! ${error.message}`),
-        HttpServerError: (error) => new Error(`You have an invalid url HttpServerError you dummy dum dum ! ${error.message}`)
+        HttpClientError: (error: Error): Error =>
+          new CustomError(`You have an invalid url you dummy dum dum ! ${error.message}`),
+        HttpServerError: (error: Error): Error =>
+          new Error(`You have an invalid url HttpServerError you dummy dum dum ! ${error.message}`)
       }
     };
 
@@ -117,7 +115,7 @@ describe('httpClient with axios concrete adapter', () => {
     await expect(responsePromise).rejects.toThrow(CustomError);
   });
 
-  it('Error log should contain enough info to help debug', async () => {
+  it('Error log should contain enough info to help debug', async (): Promise<void> => {
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
     const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
@@ -130,6 +128,7 @@ describe('httpClient with axios concrete adapter', () => {
     const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls);
 
     const expectedMessage: Record<string, unknown> = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       _response: {
         data: {
           title: 'Missing query',
@@ -139,7 +138,9 @@ describe('httpClient with axios concrete adapter', () => {
         headers: {
           server: expect.any(String),
           date: expect.any(String),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'content-type': 'application/json; charset=UTF-8',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'content-length': '58',
           connection: 'close',
           vary: 'Accept'
@@ -148,7 +149,9 @@ describe('httpClient with axios concrete adapter', () => {
       requestConfig: {
         url: 'https://api-adresse.data.gouv.fr/search/?d=18 avenue des Canuts 69120&limit=1',
         headers: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           Accept: 'application/json, text/plain, */*',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'User-Agent': 'axios/0.26.1'
         },
         method: 'get',
@@ -157,11 +160,12 @@ describe('httpClient with axios concrete adapter', () => {
       request: expect.any(Object)
     };
 
-    const error = await getError<HttpClientError>(async () =>
-      httpClient.get({
-        target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
-        targetParams: '18 avenue des Canuts 69120'
-      })
+    const error: Error | HttpClientError = await getError<HttpClientError>(
+      async (): Promise<HttpResponse> =>
+        httpClient.get({
+          target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
+          targetParams: '18 avenue des Canuts 69120'
+        })
     );
 
     expect(error).toBeInstanceOf(HttpClientError);
@@ -169,11 +173,10 @@ describe('httpClient with axios concrete adapter', () => {
   });
 });
 
-const getError = async <TError>(call: () => unknown): Promise<TError> => {
+const getError = async <TError>(call: () => unknown): Promise<Error | TError> => {
   try {
     await call();
-
-    throw new Error();
+    return new Error();
   } catch (error: unknown) {
     return error as TError;
   }

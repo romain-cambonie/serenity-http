@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios';
 import { isValidErrorResponse } from './axios.config';
 
-describe('Error Response format standard', () => {
+describe('Error Response format standard', (): void => {
   it.each([
     [null, false],
     ['plop', false],
@@ -40,7 +40,7 @@ describe('Error Response format standard', () => {
     ]
   ])(
     'isAxiosResponse should detect if the response has a valid response structure code, expect: (%s to be %s)',
-    (raw: null | string | object, expected: boolean) => {
+    (raw: object | string | null, expected: boolean): void => {
       expect(isValidErrorResponse(raw as AxiosResponse)).toBe(expected);
     }
   );

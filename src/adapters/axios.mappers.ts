@@ -1,3 +1,4 @@
+import type { AxiosResponse } from 'axios';
 import { HttpClientError, HttpClientForbiddenError, HttpServerError } from '../errors';
 import { AdapterConfig, HttpClientTargetConfig, isHttpClientError, isHttpServerError } from '../httpClient';
 import type { AxiosErrorWithResponse } from './axios.adapter';
@@ -69,9 +70,12 @@ export const toInfrastructureError = (error: Error): InfrastructureError | undef
 
 // TODO object should be forbidden, to type better
 const toSerializableAxiosHttpError = ({ response }: AxiosErrorWithResponse): object => {
-  const { config, data, status, headers, request } = response;
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const { config, data, status, headers, request }: AxiosResponse = response;
 
+  // eslint-disable-next-line @typescript-eslint/typedef
   const axiosHttpErrorWithoutRequest = {
+    /* eslint-disable-next-line @typescript-eslint/naming-convention */
     _response: {
       data,
       status,
@@ -86,12 +90,13 @@ const toSerializableAxiosHttpError = ({ response }: AxiosErrorWithResponse): obj
     }
   };
 
-  if (!request) return axiosHttpErrorWithoutRequest;
+  if (request === undefined) return axiosHttpErrorWithoutRequest;
 
   /*
    * socket, agent, res, _redirectable are keys that cause "cyclic structure" errors.
    * If needed for debug we may want to further explore them by listing keys and displaying what can be.
    */
+  // eslint-disable-next-line @typescript-eslint/typedef
   const { socket, agent, res, _redirectable, ...nonCyclicRequest } = request;
   return {
     ...axiosHttpErrorWithoutRequest,
@@ -114,7 +119,7 @@ type AxiosInfrastructureErrorObject = Partial<{
 
 const toAxiosInfrastructureErrorString = (error: unknown): string => {
   // TODO This is not satisfying
-  const infrastructureError = error as AxiosInfrastructureErrorObject;
+  const infrastructureError: AxiosInfrastructureErrorObject = error as AxiosInfrastructureErrorObject;
   return JSON.stringify(
     {
       code: infrastructureError.code,

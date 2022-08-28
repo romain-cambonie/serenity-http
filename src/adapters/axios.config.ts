@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { ErrorMapper, isHttpError } from '../httpClient';
+import type { HttpClientError, HttpServerError } from '../errors';
 import { toMappedErrorMaker, toUnhandledError } from '../httpClient.mappers';
-import type { AxiosErrorWithResponse } from './axios.adapter';
+import type { AxiosErrorWithResponse, ErrorInterceptor, TargetErrorContext } from './axios.adapter';
 import { toInfrastructureError, toHttpError } from './axios.mappers';
 import type { InfrastructureErrorKinds } from './errors';
 
@@ -13,11 +13,10 @@ export const onFullfilledDefaultResponseInterceptorMaker =
     return response;
   };
 
-export const onRejectDefaultResponseInterceptorMaker = <TargetUrls extends string>(context: {
-  target: TargetUrls;
-  errorMapper: ErrorMapper<TargetUrls>;
-}) => {
-  const toMappedError = toMappedErrorMaker(context.target, context.errorMapper);
+export const onRejectDefaultResponseInterceptorMaker = <TargetUrls extends string>(
+  context: TargetErrorContext<TargetUrls>
+): ErrorInterceptor => {
+  const toMappedError: (error: Error) => Error = toMappedErrorMaker(context.target, context.errorMapper);
 
   /*
    * TODO Because error handling logic is complicated
@@ -26,17 +25,16 @@ export const onRejectDefaultResponseInterceptorMaker = <TargetUrls extends strin
   return (rawAxiosError: AxiosError): never => {
     // Handle infrastructure and network errors
     const infrastructureError: InfrastructureErrorKinds | undefined = toInfrastructureError(rawAxiosError);
-    if (infrastructureError) throw toMappedError(infrastructureError);
+    if (infrastructureError != null) throw toMappedError(infrastructureError);
 
     throwUnhandledIfInvalidError(rawAxiosError);
 
-    const error = toHttpError(rawAxiosError as AxiosErrorWithResponse);
+    const httpError: HttpClientError | HttpServerError | undefined = toHttpError(rawAxiosError as AxiosErrorWithResponse);
 
-    // Failed to convert the error into a valid http error
-    if (!isHttpError(error))
-      throw toUnhandledError('failed to convert error to HttpClientError or HttpServerError', rawAxiosError);
+    if (httpError === undefined)
+      throw toUnhandledError('failed to convert error to valid HttpClientError or HttpServerError', rawAxiosError);
 
-    throw toMappedError(error);
+    throw toMappedError(httpError);
   };
 };
 
@@ -51,7 +49,7 @@ const throwUnhandledIfInvalidError = (rawAxiosError: AxiosError): never | void =
 };
 
 export const isValidErrorResponse = (response: AxiosResponse | undefined): response is AxiosResponse =>
-  !!response && typeof response.status === 'number';
+  !(response == null) && typeof response.status === 'number';
 
 // TODO Do we want to restrict statuses to a union of HttpCodes ?
 
