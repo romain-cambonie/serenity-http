@@ -85,14 +85,14 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-bundle
-          path: dist
 
       # TODO Edit main for entrypoint depending on release
       - name: Get to target release structure | Add readme, license and package files
         run: |
-          mkdir dist/esm-release
-          mv README.md dist/esm-release/
-          mv package.json dist/esm-release/
+          mkdir -p dist/lib 
+          mv  esm dist/lib/esm
+          mv README.md dist
+          mv package.json dist
 
       #         mkdir dist/cjs-release/  TODO Release matrix for other versions
       #         mv LICENSE.md dist/whitelist/  TODO Add license to repo
@@ -102,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release
-          path: dist/esm-release
+          path: dist
 
       # TODO Create a gh release
   #      - name: Zip release
@@ -140,4 +140,4 @@ jobs:
         run: |
           ${{ needs.dynamic-variables.outputs.package-manager }} publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTOMATION_TOKEN }}
