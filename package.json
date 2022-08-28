@@ -1,6 +1,6 @@
 {
   "name": "@serenity-dev/http-client",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "WIP: An httpClient with additional functionalities",
   "keywords": [
     "httpclient",
