@@ -1,19 +1,10 @@
 import { HttpClientError } from '../errors';
-import type {
-  AbsoluteUrl,
-  ErrorMapper,
-  HttpClient,
-  HttpResponse,
-  TargetParams,
-  TargetUrlsMapper
-} from '../httpClient';
+import type { AbsoluteUrl, ErrorMapper, HttpClient, HttpResponse, TargetParams, TargetUrlsMapper } from '../httpClient';
 import { ManagedAxios } from './axios.adapter';
 
 describe('httpClient with axios concrete adapter', () => {
   const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
-    `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(
-      rawQueryString as string
-    )}&limit=1`;
+    `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;
 
   it('expect user defined function to produce absolute url', () => {
     expect(targetToValidSearchUrl('18 avenue des Canuts 69120')).toBe(
@@ -76,12 +67,8 @@ describe('httpClient with axios concrete adapter', () => {
   it('should call API Adresse with invalid address and throw HttpClientError', async () => {
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (
-      rawQueryString?: TargetParams
-    ): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${
-        rawQueryString as string
-      }&limit=1`;
+    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
 
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
       ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
@@ -106,12 +93,8 @@ describe('httpClient with axios concrete adapter', () => {
 
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (
-      rawQueryString?: TargetParams
-    ): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${
-        rawQueryString as string
-      }&limit=1`;
+    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
 
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
       ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
@@ -119,21 +102,12 @@ describe('httpClient with axios concrete adapter', () => {
 
     const targetsErrorResponseOverrideMapper: ErrorMapper<TargetUrls> = {
       ADDRESS_API_SEARCH_ENDPOINT: {
-        HttpClientError: (error) =>
-          new CustomError(
-            `You have an invalid url you dummy dum dum ! ${error.message}`
-          ),
-        HttpServerError: (error) =>
-          new Error(
-            `You have an invalid url HttpServerError you dummy dum dum ! ${error.message}`
-          )
+        HttpClientError: (error) => new CustomError(`You have an invalid url you dummy dum dum ! ${error.message}`),
+        HttpServerError: (error) => new Error(`You have an invalid url HttpServerError you dummy dum dum ! ${error.message}`)
       }
     };
 
-    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(
-      targetUrls,
-      targetsErrorResponseOverrideMapper
-    );
+    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls, targetsErrorResponseOverrideMapper);
 
     const responsePromise: Promise<HttpResponse> = httpClient.get({
       target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
@@ -146,12 +120,8 @@ describe('httpClient with axios concrete adapter', () => {
   it('Error log should contain enough info to help debug', async () => {
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (
-      rawQueryString?: TargetParams
-    ): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${
-        rawQueryString as string
-      }&limit=1`;
+    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
 
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
       ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl

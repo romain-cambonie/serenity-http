@@ -1,11 +1,8 @@
-export type InfrastructureErrorKinds =
-  | AxiosInfrastructureError
-  | ConnectionRefusedError
-  | ConnectionResetError;
+/* eslint-disable max-classes-per-file */
+export type InfrastructureErrorKinds = AxiosInfrastructureError | ConnectionRefusedError | ConnectionResetError;
 
 export type TCPWrapperErrorCodes = 'ECONNREFUSED' | 'ECONNRESET';
-export type AxiosInfrastructureErrorCodes =
-  typeof axiosInfrastructureErrorCodes[number];
+export type AxiosInfrastructureErrorCodes = typeof axiosInfrastructureErrorCodes[number];
 
 const axiosInfrastructureErrorCodes = [
   'ERR_BAD_OPTION_VALUE',
@@ -29,8 +26,10 @@ export abstract class InfrastructureError extends Error {
     public readonly code: TCPWrapperErrorCodes | AxiosInfrastructureErrorCodes
   ) {
     super();
-    // TODO Standard way to get the stacktrace ?
-    //Error.captureStackTrace(this, this.constructor);
+    /*
+     *  TODO Standard way to get the stacktrace ?
+     * Error.captureStackTrace(this, this.constructor);
+     */
     this.name = 'InfrastructureError';
     this.message = message;
   }
@@ -48,10 +47,7 @@ export class AxiosInfrastructureError extends InfrastructureError {
 }
 
 export class ConnectionRefusedError extends InfrastructureError {
-  constructor(
-    public override readonly message: string = 'Could not connect to server',
-    public override readonly cause: Error
-  ) {
+  constructor(public override readonly message: string = 'Could not connect to server', public override readonly cause: Error) {
     super(message, cause, 'ECONNREFUSED');
     this.name = 'ConnectionRefusedError';
   }
@@ -74,13 +70,9 @@ export const isTCPWrapperConnectionResetError = (error: unknown): boolean =>
   (error as unknown as { code: string }).code === 'ECONNRESET';
 
 export const isAxiosInfrastructureError = (error: unknown): boolean => {
-  const axiosInfrastructureErrorCode: string | undefined = (
-    error as unknown as { code: string }
-  ).code;
+  const axiosInfrastructureErrorCode: string | undefined = (error as unknown as { code: string }).code;
   return (
-    !!axiosInfrastructureErrorCode &&
-    axiosInfrastructureErrorCodes.includes(
-      axiosInfrastructureErrorCode as AxiosInfrastructureErrorCodes
-    )
+    Boolean(axiosInfrastructureErrorCode) &&
+    axiosInfrastructureErrorCodes.includes(axiosInfrastructureErrorCode as AxiosInfrastructureErrorCodes)
   );
 };

@@ -21,17 +21,8 @@ export const toUnhandledError = (details: string, error: Error): Error => {
     rawString = JSON.stringify(error);
   } catch (stringifyError: unknown) {
     const keys: string[] = Object.keys(error);
-    rawString = `Failed to JSON.stringify the error due to : ${
-      (stringifyError as { message?: string })?.message
-    }. 
-    Raw object keys : ${
-      keys.length > 0
-        ? keys.join('\n')
-        : 'Object.keys(error) returned an empty array'
-    }`;
+    rawString = `Failed to JSON.stringify the error due to : ${(stringifyError as { message?: string })?.message}. 
+    Raw object keys : ${keys.length > 0 ? keys.join('\n') : 'Object.keys(error) returned an empty array'}`;
   }
-  return new UnhandledError(
-    `${details} - JSON Stringify tentative result -> ${rawString}`,
-    error
-  );
+  return new UnhandledError(`${details} - JSON Stringify tentative result -> ${rawString}`, error);
 };

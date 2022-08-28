@@ -12,10 +12,7 @@ describe('Errors', () => {
     [{ status: 503 }, HttpServerError]
   ])(
     'should return %s if status code is %d',
-    (
-      status: { status: number },
-      expected: typeof HttpClientError | HttpServerError
-    ) => {
+    (status: { status: number }, expected: typeof HttpClientError | HttpServerError) => {
       const dummy: AxiosErrorWithResponse = {
         config: {},
         isAxiosError: true,
@@ -71,8 +68,6 @@ describe('Configurations', () => {
       timeoutErrorMessage: 'PLOP'
     };
 
-    expect(
-      shallowMergeConfigs(defaultConfig, targetSpecificConfig)
-    ).toStrictEqual(expected);
+    expect(shallowMergeConfigs(defaultConfig, targetSpecificConfig)).toStrictEqual(expected);
   });
 });

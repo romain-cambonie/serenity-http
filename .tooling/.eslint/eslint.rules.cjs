@@ -1,12 +1,7 @@
 module.exports = {
   "arrow-body-style": ["error", "as-needed"],
   "object-shorthand": ["error", "always"],
-  "no-return-await": "off",
-  "require-await": "off",
   "no-console": "error",
-};
-
-const toAdd = {
   "array-callback-return": [
     "error",
     {
@@ -92,7 +87,7 @@ const toAdd = {
   "guard-for-in": ["error"],
   "id-denylist": [
     "error",
-    "data",
+    //"data",
     "err",
     "e",
     "cb",
@@ -127,7 +122,7 @@ const toAdd = {
   "max-lines-per-function": [
     "error",
     {
-      max: 16,
+      max: 24,
       skipBlankLines: true,
       skipComments: true,
     },
@@ -156,10 +151,10 @@ const toAdd = {
   "no-extra-bind": "error",
   "no-extra-boolean-cast": ["error", { enforceForLogicalOperands: true }],
   "no-floating-decimal": "error",
-  "no-implicit-coercion": "error",
+  "no-implicit-coercion": "off",
   "no-implicit-globals": "error",
   "no-implied-eval": "off",
-  "no-inline-comments": "error",
+  "no-inline-comments": "off",
   "no-invalid-this": "off",
   "no-iterator": "error",
   "no-label-var": "error",
@@ -228,7 +223,7 @@ const toAdd = {
   "no-shadow": ["off", { builtinGlobals: true, hoist: "all" }],
   "no-throw-literal": "off",
   "no-undef-init": "error",
-  "no-undefined": "error",
+  "no-undefined": "off",
   "no-underscore-dangle": "off",
   "no-unneeded-ternary": ["error", { defaultAssignment: false }],
   "no-unused-expressions": "off",
@@ -237,7 +232,7 @@ const toAdd = {
   "no-useless-concat": "error",
   "no-useless-constructor": "off",
   "no-useless-rename": "error",
-  "no-useless-return": "error",
+  "no-useless-return": "off",
   "no-var": "error",
   "no-void": "error",
 
@@ -276,11 +271,11 @@ const toAdd = {
   "require-await": "off",
   "require-unicode-regexp": "error",
   "sort-imports": "off",
-  "sort-keys": [
+  /*"sort-keys": [
     "error",
     "asc",
     { caseSensitive: true, natural: true, minKeys: 2 },
-  ],
+  ],*/
   "sort-vars": "error",
   "spaced-comment": ["error", "always"],
   strict: "error",

@@ -49,27 +49,18 @@ describe('find target from callback', () => {
   it('getTargetFromPredicate should return', () => {
     type TargetUrls = 'ADDRESS_API_SEARCH' | 'ADDRESS_API_GEOLOCATE';
 
-    const targetToValidSearchUrl = (
-      rawQueryString?: TargetParams
-    ): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(
-        rawQueryString as string
-      )}&limit=1`;
+    const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;
 
-    const targetToGeolocateUrl = (): AbsoluteUrl =>
-      `https://geo.api.gouv.fr/communes`;
+    const targetToGeolocateUrl = (): AbsoluteUrl => `https://geo.api.gouv.fr/communes`;
 
     const targetUrls: TargetUrlsMapper<TargetUrls> = {
       ADDRESS_API_SEARCH: targetToValidSearchUrl,
       ADDRESS_API_GEOLOCATE: targetToGeolocateUrl
     };
 
-    expect(getTargetFromPredicate(targetToValidSearchUrl, targetUrls)).toBe(
-      'ADDRESS_API_SEARCH'
-    );
+    expect(getTargetFromPredicate(targetToValidSearchUrl, targetUrls)).toBe('ADDRESS_API_SEARCH');
 
-    expect(getTargetFromPredicate(targetToGeolocateUrl, targetUrls)).toBe(
-      'ADDRESS_API_GEOLOCATE'
-    );
+    expect(getTargetFromPredicate(targetToGeolocateUrl, targetUrls)).toBe('ADDRESS_API_GEOLOCATE');
   });
 });
