@@ -10,22 +10,72 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  node version: '16.x'
+  package-manager: 'yarn'
+  package-manager-dependencies-command: 'yarn install --frozen-lockfile'
+  npm-package-scope: '@serenity-dev'
+
 jobs:
+  dynamic-variables:
+    outputs:
+      node-version: ${{ steps.variables.outputs.node-version }}
+      package-manager: ${{ steps.variables.outputs.package-manager }}
+      package-manager-dependencies-command: ${{ steps.variables.outputs.package-manager-dependencies-command }}
+      npm-package-scope: ${{ steps.variables.outputs.npm-package-scope }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Interpolated variables from env variables
+        id: variables
+        run: |
+          echo "::set-output name=node-version::${{ env.node-version }}"
+          echo "::set-output name=package-manager::${{ env.package-manager }}"
+          echo "::set-output name=package-manager-dependencies-command::${{ env.package-manager-dependencies-command }}"
+          echo "::set-output name=npm-package-scope::${{ env.npm-package-scope }}"
+
+  build:
+    runs-on: ubuntu-latest
+    needs:
+      - dynamic-variables
+
+    steps:
+      - name: Checkout client-application repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ needs.dynamic-variables.outputs.node-version }}
+          cache: ${{ needs.dynamic-variables.outputs.package-manager }}
+
+      - name: Install frozen dependencies
+        run: ${{ needs.dynamic-variables.outputs.package-manager-dependencies-command }}
+
+      - name: Build
+        run: |
+          ${{ needs.dynamic-variables.outputs.package-manager }} build
+
+      - name: Upload build bundle as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-bundle
+          path: |
+            lib
+
   validation:
     needs:
-      - dependencies
-
+      - dynamic-variables
     uses: ./.github/workflows/_validation.reusable.yml
-  #    with:
-  #      cache-path: ${{ needs.dependencies.outputs.pnpm_cache_path }}
-  #      cache-key: ${{ needs.dependencies.outputs.pnpm_cache_key }}
-  #      node-version: ${{ needs.dependencies.outputs.node-version }}
+    with:
+      node-version: ${{ needs.dynamic-variables.outputs.node-version }}
+      package-manager: ${{ needs.dynamic-variables.outputs.package-manager }}
 
   release:
     name: Release
     runs-on: ubuntu-latest
     needs:
-      - validation
+      - build
 
     steps:
       - name: Checkout client-application repository
@@ -34,57 +84,60 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v3
         with:
-          name: build
+          name: build-bundle
           path: dist
 
+      # TODO Edit main for entrypoint depending on release
       - name: Get to target release structure | Add readme, license and package files
         run: |
           mkdir dist/esm-release
-          mkdir dist/cjs-release
-          mv README.md dist/whitelist/
-          mv LICENSE.md dist/whitelist/
-  #         mv package.json dist/whitelist/ TODO Edit main for entrypoint
-  #         mv lib/esm/ dist/whitelist/assets/data/
+          mv README.md dist/esm-release/
+          mv package.json dist/esm-release/
 
-  #      - name: Upload build artifact
-  #        uses: actions/upload-artifact@v3
-  #        with:
-  #          name: build
-  #          path: dist
+      #         mkdir dist/cjs-release/  TODO Release matrix for other versions
+      #         mv LICENSE.md dist/whitelist/  TODO Add license to repo
 
-  #      TODO x2
+      # TODO Several version
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: dist/esm-release
+
+      # TODO Create a gh release
   #      - name: Zip release
   #        run: zip -r release.zip dist/whitelist/
-  #
+
+  # TODO Release though api (https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)
   #      - name: Publish release on github
   #        uses: softprops/action-gh-release@v1
   #        with:
   #          files: release.zip
 
   publish:
-    name: Publish on npm
+    name: Publish public package on npm
     runs-on: ubuntu-latest
     needs:
+      - dynamic-variables
       - release
+      - validation
 
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           always-auth: true
-          node-version: '16.x'
+          node-version: ${{ needs.dynamic-variables.outputs.node-version }}
           registry-url: https://registry.npmjs.org
-      #          scope: '@gouvfr-anct'
+          scope: ${{ needs.dynamic-variables.outputs.npm-package-scope }}
 
-      - name: Download build artifact
+      - name: Download release artifact
         uses: actions/download-artifact@v3
         with:
-          name: build
-          path: release
+          name: release
 
-      - name: Publish on npm
+      - name: Publish package on npm
         run: |
-          cd release/whitelist/
-          yarn publish --access public
+          ${{ needs.dynamic-variables.outputs.package-manager }} publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}

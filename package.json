@@ -4,7 +4,8 @@
   "description": "WIP: An httpClient with additional functionalities",
   "keywords": [
     "httpclient",
-    "axios"
+    "axios",
+    "esm"
   ],
   "homepage": "https://npmjs.com/package/@serenity-dev/http-client",
   "scripts": {
@@ -17,9 +18,15 @@
     "prettier:check": "prettier --config=./.tooling/.prettier/.prettierrc.json --check ./src/",
     "test": "jest --config=./.tooling/.jest/jest.config.ts"
   },
-  "author": "",
+  "author": "Romain Cambonie <romain.cambonie@gmail.com>",
   "license": "ISC",
-  "contributors": [],
+  "contributors": [
+    {
+      "name": "Romain Cambonie",
+      "email": "romain.cambonie@gmail.com",
+      "url": "https://www.linkedin.com/in/romain-cambonie/"
+    }
+  ],
   "type": "module",
   "repository": {
     "type": "git",
@@ -28,7 +35,7 @@
   "main": "./lib/esm/index.js",
   "module": "./lib/esm/index.js",
   "dependencies": {
-    "axios": "^0.26.1"
+    "axios": "0.26.1"
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
