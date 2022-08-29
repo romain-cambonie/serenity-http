@@ -1,6 +1,6 @@
 {
   "name": "@serenity-dev/http-client",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "WIP: An httpClient with additional functionalities",
   "keywords": [
     "httpclient",
@@ -16,7 +16,8 @@
     "lint-staged": "lint-staged --config=./.tooling/.lintstaged/.lintstagedrc",
     "prettier": "prettier --config=./.tooling/.prettier/.prettierrc.json  --write  ./src/",
     "prettier:check": "prettier --config=./.tooling/.prettier/.prettierrc.json --check ./src/",
-    "test": "jest --config=./.tooling/.jest/jest.config.ts"
+    "test": "jest --config=./.tooling/.jest/jest.config.ts --testRegex='^((?!external).)*.test.ts$'",
+    "test:with-external": "jest --config=./.tooling/.jest/jest.config.ts"
   },
   "author": "Romain Cambonie <romain.cambonie@gmail.com>",
   "license": "ISC",
