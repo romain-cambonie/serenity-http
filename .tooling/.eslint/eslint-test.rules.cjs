@@ -9,5 +9,6 @@ module.exports = {
     }
   ],
   'max-nested-callbacks': ['error', 4],
-  'max-statements': 'off'
+  'max-statements': 'off',
+  'id-denylist': 'off'
 };

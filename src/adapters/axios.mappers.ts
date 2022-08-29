@@ -1,14 +1,6 @@
-import {
-  HttpClientError,
-  HttpClientForbiddenError,
-  HttpServerError
-} from '../errors';
-import {
-  AdapterConfig,
-  HttpClientTargetConfig,
-  isHttpClientError,
-  isHttpServerError
-} from '../httpClient';
+import type { AxiosResponse } from 'axios';
+import { HttpClientError, HttpClientForbiddenError, HttpServerError } from '../errors';
+import { AdapterConfig, HttpClientTargetConfig, isHttpClientError, isHttpServerError } from '../httpClient';
 import type { AxiosErrorWithResponse } from './axios.adapter';
 import {
   AxiosInfrastructureError,
@@ -21,41 +13,23 @@ import {
   isTCPWrapperConnectionResetError
 } from './errors';
 
-export const toHttpError = (
-  error: AxiosErrorWithResponse
-): HttpClientError | HttpServerError | undefined => {
+export const toHttpError = (error: AxiosErrorWithResponse): HttpClientError | HttpServerError | undefined => {
   if (isHttpClientError(error.response.status)) {
-    if (error.response.status === 401)
-      return new HttpClientForbiddenError(`Forbidden Access`, error);
+    if (error.response.status === 401) return new HttpClientForbiddenError(`Forbidden Access`, error);
 
-    return new HttpClientError(
-      `${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`,
-      error,
-      error.response.status
-    );
+    return new HttpClientError(`${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`, error, error.response.status);
   }
 
   if (isHttpServerError(error.response.status)) {
-    return new HttpServerError(
-      `${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`,
-      error,
-      error.response.status
-    );
+    return new HttpServerError(`${JSON.stringify(toSerializableAxiosHttpError(error), null, 2)}`, error, error.response.status);
   }
 
-  return;
+  return undefined;
 };
 
-export const toInfrastructureError = (
-  error: Error
-): InfrastructureError | undefined => {
+export const toInfrastructureError = (error: Error): InfrastructureError | undefined => {
   if (isTCPWrapperConnectionRefusedError(error))
-    return new ConnectionRefusedError(
-      `Could not connect to server : ${toAxiosInfrastructureErrorString(
-        error
-      )}`,
-      error
-    );
+    return new ConnectionRefusedError(`Could not connect to server : ${toAxiosInfrastructureErrorString(error)}`, error);
 
   if (isTCPWrapperConnectionResetError(error))
     return new ConnectionResetError(
@@ -72,33 +46,36 @@ export const toInfrastructureError = (
       (error as unknown as { code: AxiosInfrastructureErrorCodes }).code
     );
 
-  return;
+  return undefined;
 };
 
 // TODO Do better with generic
-/*type PartiallyTypedSerializableAxiosHttpError = {
-  _response: {
-    data: any,
-    status: number,
-    headers: AxiosResponseHeaders,
-    requestConfig: {
-      url: string,
-      headers: AxiosRequestHeaders,
-      method: string,
-      data: any,
-      timeout: number,
-    },
-    request?: object;
-  }
-};*/
+/*
+ *type PartiallyTypedSerializableAxiosHttpError = {
+ *_response: {
+ *  data: any,
+ *  status: number,
+ *  headers: AxiosResponseHeaders,
+ *  requestConfig: {
+ *    url: string,
+ *    headers: AxiosRequestHeaders,
+ *    method: string,
+ *    data: any,
+ *    timeout: number,
+ *  },
+ *  request?: object;
+ *}
+ *};
+ */
 
 // TODO object should be forbidden, to type better
-const toSerializableAxiosHttpError = ({
-  response
-}: AxiosErrorWithResponse): object => {
-  const { config, data, status, headers, request } = response;
+const toSerializableAxiosHttpError = ({ response }: AxiosErrorWithResponse): object => {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const { config, data, status, headers, request }: AxiosResponse = response;
 
+  // eslint-disable-next-line @typescript-eslint/typedef
   const axiosHttpErrorWithoutRequest = {
+    /* eslint-disable-next-line @typescript-eslint/naming-convention */
     _response: {
       data,
       status,
@@ -113,10 +90,13 @@ const toSerializableAxiosHttpError = ({
     }
   };
 
-  if (!request) return axiosHttpErrorWithoutRequest;
+  if (request === undefined) return axiosHttpErrorWithoutRequest;
 
-  // socket, agent, res, _redirectable are keys that cause "cyclic structure" errors.
-  // If needed for debug we may want to further explore them by listing keys and displaying what can be.
+  /*
+   * socket, agent, res, _redirectable are keys that cause "cyclic structure" errors.
+   * If needed for debug we may want to further explore them by listing keys and displaying what can be.
+   */
+  // eslint-disable-next-line @typescript-eslint/typedef
   const { socket, agent, res, _redirectable, ...nonCyclicRequest } = request;
   return {
     ...axiosHttpErrorWithoutRequest,
@@ -139,18 +119,18 @@ type AxiosInfrastructureErrorObject = Partial<{
 
 const toAxiosInfrastructureErrorString = (error: unknown): string => {
   // TODO This is not satisfying
-  const err = error as AxiosInfrastructureErrorObject;
+  const infrastructureError: AxiosInfrastructureErrorObject = error as AxiosInfrastructureErrorObject;
   return JSON.stringify(
     {
-      code: err.code,
-      address: err.address,
-      port: err.port,
+      code: infrastructureError.code,
+      address: infrastructureError.address,
+      port: infrastructureError.port,
       config: {
-        headers: err.config?.headers,
-        method: err.config?.method,
-        url: err.config?.url,
-        baseUrl: err.config?.baseUrl,
-        data: err.config?.data
+        headers: infrastructureError.config?.headers,
+        method: infrastructureError.config?.method,
+        url: infrastructureError.config?.url,
+        baseUrl: infrastructureError.config?.baseUrl,
+        data: infrastructureError.config?.data
       }
     },
     null,
@@ -158,10 +138,7 @@ const toAxiosInfrastructureErrorString = (error: unknown): string => {
   );
 };
 
-export const shallowMergeConfigs = (
-  initialConfig: AdapterConfig,
-  additionalConfig: HttpClientTargetConfig
-): AdapterConfig => ({
+export const shallowMergeConfigs = (initialConfig: AdapterConfig, additionalConfig: HttpClientTargetConfig): AdapterConfig => ({
   ...initialConfig,
   ...additionalConfig.adapterConfig
 });

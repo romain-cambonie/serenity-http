@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-describe('Error Response format', () => {
+describe('Error Response format', (): void => {
   it.each([
     [{ response: {} }, false],
     [
@@ -26,7 +26,7 @@ describe('Error Response format', () => {
     ]
   ])(
     'isAxiosError should detect if the response has a valid format, expect: (%s to be %s)',
-    (raw: object, expected: boolean) => {
+    (raw: object, expected: boolean): void => {
       expect(axios.isAxiosError(raw)).toBe(expected);
     }
   );

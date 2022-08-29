@@ -1,5 +1,4 @@
 module.exports = {
-  "@typescript-eslint/explicit-function-return-type": "off",
   "@typescript-eslint/explicit-module-boundary-types": "off",
   "@typescript-eslint/no-explicit-any": "error",
   "@typescript-eslint/no-floating-promises": [
@@ -9,7 +8,6 @@ module.exports = {
       ignoreIIFE: false,
     },
   ],
-  "@typescript-eslint/no-inferrable-types": "off",
   "@typescript-eslint/no-namespace": "error",
   "@typescript-eslint/no-non-null-assertion": "error",
   "@typescript-eslint/no-unused-vars": [
@@ -37,9 +35,6 @@ module.exports = {
       allowRegExp: false,
     },
   ],
-};
-
-const toAddBitsByBits = {
   "@typescript-eslint/array-type": ["error", { default: "array" }],
   "@typescript-eslint/ban-tslint-comment": "error",
   "@typescript-eslint/class-literal-property-style": "error",
@@ -59,7 +54,7 @@ const toAddBitsByBits = {
     {
       allowExpressions: false,
       allowTypedFunctionExpressions: false,
-      allowHigherOrderFunctions: false,
+      allowHigherOrderFunctions: true,
       allowDirectConstAssertionInArrowFunctions: false,
       allowConciseArrowFunctionExpressionsStartingWithVoid: false,
     },
@@ -70,7 +65,7 @@ const toAddBitsByBits = {
       accessibility: "explicit",
       overrides: {
         accessors: "explicit",
-        constructors: "explicit",
+        constructors: "no-public",
         methods: "explicit",
         properties: "explicit",
         parameterProperties: "explicit",
@@ -92,7 +87,7 @@ const toAddBitsByBits = {
     },
   ],
   "@typescript-eslint/member-ordering": [
-    "error",
+    "off",
     {
       default: {
         memberTypes: [
@@ -180,6 +175,18 @@ const toAddBitsByBits = {
       format: ["camelCase"],
       modifiers: ["private"],
       leadingUnderscore: "require",
+    },
+    {
+      selector: "objectLiteralMethod",
+      format: ["camelCase", "PascalCase"],
+      leadingUnderscore: "forbid",
+      trailingUnderscore: "forbid",
+    },
+    {
+      selector: "objectLiteralProperty",
+      format: ["camelCase", "UPPER_CASE"],
+      leadingUnderscore: "forbid",
+      trailingUnderscore: "forbid",
     },
     {
       selector: "variable",
@@ -299,7 +306,7 @@ const toAddBitsByBits = {
   "@typescript-eslint/no-implied-eval": "error",
   "@typescript-eslint/no-invalid-this": "error",
   "@typescript-eslint/no-loop-func": "error",
-  "@typescript-eslint/no-magic-numbers": ["error", { ignore: [0, 1] }],
+  "@typescript-eslint/no-magic-numbers": ["off", { ignore: [0, 1] }],
   "@typescript-eslint/no-restricted-imports": [
     "error",
     {
@@ -349,6 +356,6 @@ const toAddBitsByBits = {
     "error",
     { allowShortCircuit: true },
   ],
-  "@typescript-eslint/no-use-before-define": "error",
+  "@typescript-eslint/no-use-before-define": "off",
   "@typescript-eslint/no-useless-constructor": "error",
 };

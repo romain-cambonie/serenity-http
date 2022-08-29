@@ -5,33 +5,25 @@ import type { ErrorMapper } from './httpClient';
 export const toMappedErrorMaker =
   <T extends string>(target: T, errorMapper: ErrorMapper<T> = {}) =>
   (error: Error): Error => {
-    const errorByName = errorMapper[target];
-    if (!errorByName) return error;
+    const errorByName: Partial<Record<T, (error: Error) => Error>> | undefined = errorMapper[target];
+    if (errorByName === undefined) return error;
 
-    const newErrorMaker = errorByName[error.name];
+    const newErrorMaker: ((error: Error) => Error) | undefined = errorByName[error.name as T];
 
-    if (!newErrorMaker) return error;
+    if (newErrorMaker === undefined) return error;
 
     return newErrorMaker(error);
   };
 
-export const toUnhandledError = (details: string, error: Error): Error => {
-  let rawString: string;
+export const toUnhandledError = (details: string, error: Error): Error =>
+  new UnhandledError(`${details} - JSON Stringify tentative result -> ${extractErrorInfo(error)}`, error);
+
+const extractErrorInfo = (error: Error): string => {
   try {
-    rawString = JSON.stringify(error);
+    return JSON.stringify(error);
   } catch (stringifyError: unknown) {
     const keys: string[] = Object.keys(error);
-    rawString = `Failed to JSON.stringify the error due to : ${
-      (stringifyError as { message?: string })?.message
-    }. 
-    Raw object keys : ${
-      keys.length > 0
-        ? keys.join('\n')
-        : 'Object.keys(error) returned an empty array'
-    }`;
+    return `Failed to JSON.stringify the error due to : ${(stringifyError as { message?: string }).message}. 
+    Raw object keys : ${keys.length > 0 ? keys.join('\n') : 'Object.keys(error) returned an empty array'}`;
   }
-  return new UnhandledError(
-    `${details} - JSON Stringify tentative result -> ${rawString}`,
-    error
-  );
 };
