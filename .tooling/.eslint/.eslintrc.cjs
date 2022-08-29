@@ -59,6 +59,7 @@ const lintTests = () => {
       plugins: ["jest", "@typescript-eslint"],
       rules: {
         ...require("./eslint.rules.cjs"),
+        ...require("./eslint-test.rules.cjs"),
         ...require("./typescript-eslint.rules.cjs"),
         ...require("./typescript-eslint-test.rules.cjs"),
         ...require("./jest-eslint.rules.cjs"),
