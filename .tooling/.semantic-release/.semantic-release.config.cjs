@@ -1,4 +1,3 @@
 module.exports = {
-    "branches": ["master"],
-    "plugins": []
+    "branches": ["'+([0-9])?(.{+([0-9]),x}).x'", "master"]
 }
