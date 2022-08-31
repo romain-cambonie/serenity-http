@@ -3,8 +3,8 @@ name: Release and publish packages
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +26,9 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - name: Var
+        run: env
+
       - name: Interpolated variables from env variables
         id: variables
         run: |
