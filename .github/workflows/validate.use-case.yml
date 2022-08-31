@@ -4,9 +4,8 @@ name: Validation
 on:
   workflow_dispatch:
   push:
-    branches:
-      - '**'
-      - '!master'
+    branches-ignore:
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
