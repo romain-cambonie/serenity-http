@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  node version: '16.x'
+  node version: 'lts/*'
   package-manager: 'yarn'
   package-manager-dependencies-command: 'yarn install --frozen-lockfile'
   npm-package-scope: '@serenity-dev'
@@ -91,8 +91,9 @@ jobs:
         run: |
           mkdir -p dist/lib 
           mv  esm dist/lib/esm
-          mv README.md dist
-          mv package.json dist
+
+      #          mv README.md dist
+      #          mv package.json dist
 
       #         mkdir dist/cjs-release/  TODO Release matrix for other versions
       #         mv LICENSE.md dist/whitelist/  TODO Add license to repo
@@ -123,21 +124,35 @@ jobs:
       - validation
 
     steps:
+      # For now limit to master branch for commit and history
+      - name: Checkout repo with complete history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: 'master'
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          always-auth: true
           node-version: ${{ needs.dynamic-variables.outputs.node-version }}
-          registry-url: https://registry.npmjs.org
-          scope: ${{ needs.dynamic-variables.outputs.npm-package-scope }}
 
       - name: Download release artifact
         uses: actions/download-artifact@v3
         with:
           name: release
 
-      - name: Publish package on npm
-        run: |
-          ${{ needs.dynamic-variables.outputs.package-manager }} publish --access public
+      # Using a symbolic link because there is no base option to have a config path with semantic-release as of 2022-08-31
+      - name: Link the semantic release config and release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTOMATION_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NODE_AUTOMATION_TOKEN }}
+        run: |
+          ln -s .tooling/.semantic-release/.semantic-release.config.cjs release.config.cjs
+          npx semantic-release
+
+#
+#      - name: Publish package on npm
+#        run: |
+#          ${{ needs.dynamic-variables.outputs.package-manager }} publish --access public
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTOMATION_TOKEN }}

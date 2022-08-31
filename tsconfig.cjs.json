@@ -1,7 +1,7 @@
 // TODO Depecated, to update
 {
   "compilerOptions": {
-    "outDir": "lib/cjs",
+    "outDir": "./lib/cjs",
     "target": "es2017",
     "lib": ["esNext"],
     "module": "CommonJS",
@@ -14,5 +14,5 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
   },
-  "exclude": ["/**/*.test.ts", "lib"]
+  "exclude": ["/**/*.test.ts", "./lib"]
 }
