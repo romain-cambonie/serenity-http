@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  node version: '16.x'
+  node version: 'lts/*'
   package-manager: 'yarn'
   package-manager-dependencies-command: 'yarn install --frozen-lockfile'
 
