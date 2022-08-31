@@ -73,7 +73,7 @@ La branche `main`, ainsi que l'ensemble des branches de travail avec un préfixe
 - Il faut forcément créer une nouvelle branche de travail avec l'un préfixe autorisé
 - À chaque publication sur une branche de travail, le workflow `Validate feature` sur [github actions](https://github.com/anct-cartographie-nationale/client-application/actions) vérifie
   - Qu'il est possible de créer un build sans erreur
-  - Que la syntaxe correspond bien à ce qui est [défini par Prettier](https://github.com/anct-cartographie-nationale/client-base/blob/main/.prettierrc.json)
+  - Que la syntaxe correspond bien à ce qui est [défini par Prettier](https://github.com/anct-cartographie-nationale/client-base/blob/main/.prettierrc.cjson)
   - Que le code écrit en TypeScript respecte les conventions décrites par les [règles ESLint](https://github.com/anct-cartographie-nationale/client-base/blob/main/.eslintrc.json)
   - Que le style écrit en SCSS respecte les conventions décrites par les [règles Standard](https://github.com/anct-cartographie-nationale/client-base/blob/main/.stylelintrc.json)
   - Que les messages des commits suivent le standard établi par [Conventional Commits](https://www.conventionalcommits.org/fr)
@@ -114,7 +114,7 @@ Rules default configuration can be found here: TODO
 
 ## Prettier
 
-Prettier configuration is in [.prettierrc.json](../.tooling/.prettier/.prettierrc.json)
+Prettier configuration is in [.prettierrc.cjs](../.tooling/.prettier/.prettierrc.cjs)
 Prettier ignore the resources referenced in [.prettierignore](../.tooling/.prettier/.prettierignore)
 
 ## Jest

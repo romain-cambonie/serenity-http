@@ -16,7 +16,7 @@ on:
       node-version:
         required: false
         type: string
-        default: '16.x'
+        default: 'lts/*'
       package-manager:
         required: false
         type: string

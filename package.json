@@ -14,8 +14,8 @@
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "lint": "eslint --config=./.tooling/.eslint/.eslintrc.cjs  ./src/",
     "lint-staged": "lint-staged --config=./.tooling/.lintstaged/.lintstagedrc",
-    "prettier": "prettier --config=./.tooling/.prettier/.prettierrc.json  --write  ./src/",
-    "prettier:check": "prettier --config=./.tooling/.prettier/.prettierrc.json --check ./src/",
+    "prettier": "prettier --config=./.tooling/.prettier/.prettierrc.cjs  --write  ./src/",
+    "prettier:check": "prettier --config=./.tooling/.prettier/.prettierrc.cjs --check ./src/",
     "test": "jest --config=./.tooling/.jest/jest.config.ts --testRegex='^((?!external).)*.test.ts$'",
     "test:with-external": "jest --config=./.tooling/.jest/jest.config.ts"
   },
