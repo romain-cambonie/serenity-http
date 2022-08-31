@@ -1,12 +1,21 @@
 name: Validation
 
-# TODO Limit to prefixed branches, ignore tagged branch or setup output to make release and publish trigger it
 on:
   workflow_dispatch:
   push:
     branches:
-      - '**'
-      - '!master'
+      - 'build/*'
+      - 'chore/*'
+      - 'ci/*'
+      - 'docs/*'
+      - 'feat/*'
+      - 'fix/*'
+      - 'perf/*'
+      - 'refactor/*'
+      - 'revert/*'
+      - 'style/*'
+      - 'test/*'
+      - 'release/*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
