@@ -1,16 +1,16 @@
 # Serenity Http Client
 
+# NOT READY FOR PRODUCTION USE !
+
 ## About
 
 This this an early draft of the projected thing.
 
-Serenity Http Client aim to provide a target based httpclient that manage common use cases out of the box and provide powerful tooling for complex use cases
+Serenity Http Client aim to provide a target based httpclient that manage common use cases out of the box and provide powerful tooling for complex use cases.
 
 ## ESM/CJS
 
-# TODO : Two separated packages should be published for ease of use
-
-The default target is esm but you can change it to cjs by altering the 'main' target in package.json
+### NEXT : Will add the commonjs output to release artifact
 
 ## Known Issues
 
