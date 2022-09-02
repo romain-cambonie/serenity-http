@@ -1,6 +1,6 @@
 {
   "name": "@serenity-dev/http-client",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "WIP: An httpClient with additional functionalities",
   "keywords": [
     "httpclient",
@@ -33,7 +33,7 @@
     "type": "git",
     "url": "https://github.com/romain-cambonie/serenity-http-client.git"
   },
-  "main": "./lib/esm/index.js",
+  "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "dependencies": {
     "axios": "0.26.1"
