@@ -1,11 +1,11 @@
 // Lint the files included in each typescript project with common rules
 const projects = [
-  "./../../tsconfig.json",
+  "./../../.tsconfigs/tsconfig.16.esm.json",
 ];
 
 // Lint the files included in each typescript project with common rules and jest specific rules
 const projectsTests = [
-  "./../../tsconfig.test.json",
+  "./../../.tsconfigs/tsconfig.16.esm.test.json",
 ];
 
 // Lint project using its tsconfig.json.

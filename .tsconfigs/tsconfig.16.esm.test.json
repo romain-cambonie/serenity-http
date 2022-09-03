@@ -3,6 +3,6 @@
   "compilerOptions": {
     "importsNotUsedAsValues": "preserve" /* "preserve" because type / value injection needed for jest.expect.toThrow cause problems otherwise */
   },
-  "include": ["src/**/*.test.ts"],
+  "include": ["../src/**/*.test.ts"],
   "exclude": ["../lib"]
 }

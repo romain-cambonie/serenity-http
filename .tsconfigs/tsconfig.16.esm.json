@@ -41,6 +41,6 @@
     //"allowJs": false,
     //"checkJs": false
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["/**/*.test.ts", "../lib"]
+  "include": ["../src/**/*.ts"],
+  "exclude": ["../**/*.test.ts", "../lib"]
 }
