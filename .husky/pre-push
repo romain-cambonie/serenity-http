@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+echo 'Pre-push hook: lint, prettify and execute tests on project'
 yarn prettier:check
 yarn lint
 yarn test

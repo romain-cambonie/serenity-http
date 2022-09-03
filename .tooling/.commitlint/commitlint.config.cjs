@@ -19,7 +19,6 @@ module.exports = {
             2,
             'always',
             [
-                'care',
                 'build',
                 'chore',
                 'ci',

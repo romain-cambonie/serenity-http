@@ -1,12 +1,22 @@
+# Contribution
+
+## Table of contents
+
+- 📦 [Prerequisites](#prerequisites)
+- 🚀 [Installation](#installation)
+- 🤝 [Contribution requirements](#contribution-requirements)
+
 # Prerequisites
 
-- [Git](https://git-scm.com/) : Système de contrôle de versions distribué d'un ensemble de fichiers
-- [Node](https://nodejs.org/) : Environnement d'exécution pour Javascript
-- [Yarn](https://yarnpkg.com/) : Gestionnaire de paquets pour les produits développés dans des environnements Node
+- [Git](https://git-scm.com/) :software for distributed version control
+- [Node](https://nodejs.org/) : cross-platform JavaScript runtime environment
+- [Yarn](https://yarnpkg.com/) : Software packaging system
 
-> Node et Yarn peuvent être installés via [nvm](https://github.com/nvm-sh/nvm) qui permet d'obtenir et d'utiliser rapidement différentes versions de Node via la ligne de commande.
+## Recommended
 
-# Project Installation
+> Node and Yarn can be installed with Node Version Manager [nvm](https://github.com/nvm-sh/nvm) that allows you to quickly install and use different versions of node via the command line.
+
+# Installation
 
 ## 1. Clone
 
@@ -20,132 +30,52 @@ git clone git@github.com:romain-cambonie/serenity-http-client.git
 yarn
 ```
 
-## 3. Husky
+## 3. Set Husky hooks as executable
 
 ```
-npx install husky
 chmod a+x .husky/pre-commit
 chmod a+x .husky/pre-push
 ```
 
-### Execution right on hooks
+# Contribution requirements
 
-If you see the warning :
+## Branches naming rules
 
-```
+- Must be up-to-date with master (rebased, linear history)
+- Must be prefixed with follow the `build/`, `chore/`, `ci/`, `docs/`, `feat/`, `fix/`, `perf/`, `refactor/`, `revert/`, `style/` or `test/` according to their content. See [Conventional Commits cheat sheet](https://kapeli.com/cheat_sheets/Conventional_Commits.docset/Contents/Resources/Documents/index)
 
-```
+## Commits rules
 
-hint: The '.husky/pre-commit' hook was ignored because it's not set as executable.
-If the hooks do not have the 'execute' right you must add it.
+### Format
 
-Eg:
+Must follow conventional commits specification: [Commits Conventionnels](https://www.conventionalcommits.org/fr)
 
-```shell
-chmod a+x .husky/pre-commit
-chmod a+x .husky/pre-push
-```
+### Verified
 
-# Contribution
+Commits must be verified: [About commit signature verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
 
-## Nommage des branches
+### Continuous integration check
 
-- Avant de créer une nouvelle branche de travail, récupérer les dernières modifications disponibles sur la branche `main`
-- La nouvelle branche de travail doit ête préfixée par `build/`, `chore/`, `ci/`, `docs/`, `feat/`, `fix/`, `perf/`, `refactor/`, `revert/`, `style/` ou `test/` en fonction du type de modification prévu, pour plus de détails à ce sujet, consulter [Conventional Commits cheat sheet](https://kapeli.com/cheat_sheets/Conventional_Commits.docset/Contents/Resources/Documents/index)
-- Une branche portant une version à publier doit être de la forme `release/X.Y` avec `X.Y` égal au numéro de majeur et de mineur de la release, cela signifie donc que tous les patches sont à appliquer sur la même branche pour chaque version mineure. Cette organisation permet de gérer plusieurs versions de la bibliothèque en parallèle sans mettre en péril la rétrocompatibilité.
+- All validation checks in workflow `Validate` must pass without failure
 
-## Commits
+# Releases
 
-### Convention
+Release on NPM and Github are fully automated on merge on master with Semantic Release.
 
-Les commits de ce repository doivent respecter la syntaxe décrite par la spécification des [Commits Conventionnels](https://www.conventionalcommits.org/fr)
+## NPM
 
-### Signature
+[npm](https://www.npmjs.com/) npm is the world's largest javascript software registry.
 
-La branche `main`, ainsi que l'ensemble des branches de travail avec un préfixe valide requièrent que les commits soient signés :
+- Organisation : [@serenity-dev](https://www.npmjs.com/org/serenity-dev)
+- Package : [@serenity-dev/http-client](https://www.npmjs.com/package/@serenity-dev/http-client)
 
-- La documentation de GitHub indique comment [configurer la signature des commits](https://docs.github.com/en/enterprise-server@3.5/authentication/managing-commit-signature-verification/about-commit-signature-verification)
-- Les utilisateurs de [keybase](https://keybase.io/) peuvent [signer leurs commits avec leur clé GPG sur Keybase](https://stephenreescarter.net/signing-git-commits-with-a-keybase-gpg-key/)
+## Github
 
-## Publier sur la branche principale
+[Repository](https://github.com/romain-cambonie/serenity-http-client)
 
-- La branche principale est `main`, il n'est pas possible de publier en faisant un `push` depuis un dépôt local
-- Il faut forcément créer une nouvelle branche de travail avec l'un préfixe autorisé
-- À chaque publication sur une branche de travail, le workflow `Validate feature` sur [github actions](https://github.com/anct-cartographie-nationale/client-application/actions) vérifie
-  - Qu'il est possible de créer un build sans erreur
-  - Que la syntaxe correspond bien à ce qui est [défini par Prettier](https://github.com/anct-cartographie-nationale/client-base/blob/main/.prettierrc.cjson)
-  - Que le code écrit en TypeScript respecte les conventions décrites par les [règles ESLint](https://github.com/anct-cartographie-nationale/client-base/blob/main/.eslintrc.json)
-  - Que le style écrit en SCSS respecte les conventions décrites par les [règles Standard](https://github.com/anct-cartographie-nationale/client-base/blob/main/.stylelintrc.json)
-  - Que les messages des commits suivent le standard établi par [Conventional Commits](https://www.conventionalcommits.org/fr)
-- Une fois les développements terminés, il faut créer une [pull request](https://github.com/anct-cartographie-nationale/client-application/pulls) avec la banche de travail comme origin et la branche `main` comme destination.
-- La pull request ne peut être fusionné que si :
-  - Les étapes du workflow `Validate feature` sont valides
-  - Les fichiers modifiés ont été revus par au moins une personne
-  - Les commits ajoutés sont signés
-- La branche de travail est supprimée automatiquement une fois qu'elle a été fusionnée
-
-# Tooling setup
+# Forking additional setup
 
 ## Github actions
 
 - Repository secrets to setup :
   - `NODE_AUTH_TOKEN`: NPM access token to publish on organisation [@serenity-dev](https://www.npmjs.com/org/serenity-dev)
-
-# Releases
-
-## NPM
-
-- [npm](https://www.npmjs.com/) npm is the world's largest javascript software registry.
-  - Organisation : [@serenity-dev](https://www.npmjs.com/org/serenity-dev)
-  - Packages :
-    - [CommonJS @serenity-dev/http-client](https://www.npmjs.com/package/@serenity-dev/http-client)
-    - [EcmaScript @serenity-dev/http-client-esm](https://www.npmjs.com/package/@serenity-dev/http-client-esm)
-
-## Github
-
-# Tooling reference
-
-## Eslint
-
-Eslint configuration is in [.eslintrc.js](../.tooling/.eslint/.eslintrc.cjs)
-Eslint ignore the resources referenced in [.eslintignore](../.tooling/.eslint/.eslintignore)
-Rules directory is in [.eslint](../.tooling/.eslint)
-Rules default configuration can be found here: TODO
-
-## Prettier
-
-Prettier configuration is in [.prettierrc.cjs](../.tooling/.prettier/.prettierrc.cjs)
-Prettier ignore the resources referenced in [.prettierignore](../.tooling/.prettier/.prettierignore)
-
-## Jest
-
-Jest configuration is in [jest.config.ts](../.tooling/.jest/jest.config.ts)
-[Documentation](https://jestjs.io/)
-
-## Husky
-
-### Configuration
-
-Husky configuration is in [.husky](../.tooling/.husky)
-[Documentation](https://typicode.github.io/husky/#/)
-
-#### Pre-commit hook
-
-Configuration: [pre-commit](../.husky/pre-commit)  
-The pre-commit hook execute the `lint-staged` script
-
-#### Pre-push hook
-
-Configuration: [pre-push](../.husky/pre-push)  
-The current configuration run
-
-- yarn prettier:check => Check prettier on all files
-- eslint ./\*\*/src/ => Check lint on all files in sources directories
-- yarn test => Run all tests not needing dependencies
-
-## Lint-staged
-
-Configuration: [.lintstagedrc](../.tooling/.lintstaged/.lintstagedrc)
-[Documentation](https://github.com/okonet/lint-staged)
-
-The current configuration run the linter and prettier on 'staged' files (files where git has detected a modification).
