@@ -30,9 +30,11 @@ git clone git@github.com:romain-cambonie/serenity-http-client.git
 yarn
 ```
 
-## 3. Set Husky hooks as executable
+## 3. Set active Husky hooks as executable
 
 ```
+husky install
+chmod a+x .husky/commit-msg
 chmod a+x .husky/pre-commit
 chmod a+x .husky/pre-push
 ```

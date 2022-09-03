@@ -9,7 +9,6 @@
   ],
   "homepage": "https://npmjs.com/package/@serenity-dev/http-client",
   "scripts": {
-    "prepare": "if [[ -z $CI ]]; then husky install; fi;",
     "build": "yarn build:esm",
     "build:esm": "tsc -p .tsconfigs/tsconfig.16.esm.json",
     "build:cjs": "tsc -p .tsconfigs/tsconfig.16.cjs.json",
@@ -46,6 +45,7 @@
     "@types/node": "^18.7.13",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
     "@typescript-eslint/parser": "^5.35.1",
+    "concurrently": "^7.3.0",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jest": "^26.8.7",
