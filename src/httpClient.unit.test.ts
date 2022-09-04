@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import {
-  AbsoluteUrl,
+  ValidUrl,
   getTargetFromPredicate,
   isHttpClientError,
   isHttpServerError,
-  TargetParams,
-  TargetUrlsMapper
+  Targets,
+  ResolvedUrl,
+  getFullyQualifiedUrl
 } from './httpClient';
 
 describe('Http Client Errors', (): void => {
@@ -47,22 +48,42 @@ describe('Http Server Errors', (): void => {
   );
 });
 
+describe('return valid url from string or callback', (): void => {
+  it('should return the url as a valid url from target configuration and target kind', (): void => {
+    const apiAdresseSearchUrl: ResolvedUrl<string> = (rawQueryString: string): ValidUrl =>
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString)}&limit=1`;
+
+    const apiAdresseSearchRandom: ResolvedUrl = (): ValidUrl =>
+      `https://api-adresse.data.gouv.fr/search/?q=${Math.random()}&limit=1`;
+
+    const apiGeoListCommunesUrl: ResolvedUrl = `https://geo.api.gouv.fr/communes`;
+
+    expect(getFullyQualifiedUrl(apiGeoListCommunesUrl)).toBe('https://geo.api.gouv.fr/communes');
+    expect(getFullyQualifiedUrl(apiAdresseSearchUrl, '8 chemin du Ban, 69120')).toBe(
+      'https://api-adresse.data.gouv.fr/search/?q=8+chemin+du+Ban,+69120&limit=1'
+    );
+    expect(getFullyQualifiedUrl(apiAdresseSearchRandom)).toBe(
+      'https://api-adresse.data.gouv.fr/search/?q=8+chemin+du+Ban,+69120&limit=1'
+    );
+  });
+});
+
 describe('find target from callback', (): void => {
   it('getTargetFromPredicate should return', (): void => {
-    type TargetUrls = 'ADDRESS_API_GEOLOCATE' | 'ADDRESS_API_SEARCH';
+    type TargetUrls = 'ADDRESS_API_SEARCH' | 'GEO_API_COMMUNES';
 
-    const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;
+    const apiAdresseSearchUrl: ResolvedUrl<string> = (rawQueryString: string): ValidUrl =>
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString)}&limit=1`;
 
-    const targetToGeolocateUrl = (): AbsoluteUrl => `https://geo.api.gouv.fr/communes`;
+    const apiGeoListCommunesUrl: ValidUrl = `https://geo.api.gouv.fr/communes`;
 
-    const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH: targetToValidSearchUrl,
-      ADDRESS_API_GEOLOCATE: targetToGeolocateUrl
+    const targetUrls: Targets<TargetUrls> = {
+      ADDRESS_API_SEARCH: { url: apiAdresseSearchUrl },
+      GEO_API_COMMUNES: { url: apiGeoListCommunesUrl }
     };
 
-    expect(getTargetFromPredicate(targetToValidSearchUrl, targetUrls)).toBe('ADDRESS_API_SEARCH');
+    expect(getTargetFromPredicate(apiAdresseSearchUrl, targetUrls)).toBe('ADDRESS_API_SEARCH');
 
-    expect(getTargetFromPredicate(targetToGeolocateUrl, targetUrls)).toBe('ADDRESS_API_GEOLOCATE');
+    expect(getTargetFromPredicate(apiGeoListCommunesUrl, targetUrls)).toBe('ADDRESS_API_GEOLOCATE');
   });
 });

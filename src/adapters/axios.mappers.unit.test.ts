@@ -1,6 +1,6 @@
 import type { AxiosRequestHeaders, AxiosResponse } from 'axios';
 import { HttpClientError, HttpServerError } from '../errors';
-import type { AbsoluteUrl, AdapterConfig, HttpClientTargetConfig } from '../httpClient';
+import type { ValidUrl, AdapterConfig, HttpClientTargetConfig } from '../httpClient';
 import type { AxiosErrorWithResponse } from './axios.adapter';
 import { shallowMergeConfigs, toHttpError } from './axios.mappers';
 
@@ -53,7 +53,7 @@ describe('Configurations', (): void => {
     };
 
     const targetSpecificConfig: HttpClientTargetConfig = {
-      target: (): AbsoluteUrl => 'https://plop',
+      target: (): ValidUrl => 'https://plop',
       adapterConfig: {
         headers: {
           accept: 'text/html; charset=UTF-8'

@@ -1,29 +1,34 @@
 import { HttpClientError } from '../errors';
-import type { AbsoluteUrl, ErrorMapper, HttpClient, HttpResponse, TargetParams, TargetUrlsMapper } from '../httpClient';
+import type { ValidUrl, ErrorMapper, HttpClient, HttpResponse, Targets, ResolvedUrl, HttpClientGetConfig } from '../httpClient';
 import { ManagedAxios } from './axios.adapter';
 
 describe('httpClient with axios concrete adapter', (): void => {
-  const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
-    `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;
-
   it('expect user defined function to produce absolute url', (): void => {
-    expect(targetToValidSearchUrl('18 avenue des Canuts 69120')).toBe(
+    const searchUrlMaker: ResolvedUrl<string> = (rawQueryString: string): ValidUrl =>
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString)}&limit=1`;
+
+    expect(searchUrlMaker('18 avenue des Canuts 69120')).toBe(
       `https://api-adresse.data.gouv.fr/search/?q=18%20avenue%20des%20Canuts%2069120&limit=1`
     );
   });
 
   it('should call API Adresse and return 200 with data', async (): Promise<void> => {
-    type TargetUrls = 'ADRESS_API_ENDPOINT';
-    const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADRESS_API_ENDPOINT: targetToValidSearchUrl
+    const searchUrlMaker: ResolvedUrl<string> = (rawQueryString: string): ValidUrl =>
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString)}&limit=1`;
+
+    type TargetKinds = 'ADRESSE_API_ENDPOINT';
+    const targetUrls: Targets<TargetKinds> = {
+      ADRESSE_API_ENDPOINT: { url: searchUrlMaker }
     };
 
-    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls);
+    const httpClient: HttpClient<TargetKinds> = new ManagedAxios(targetUrls);
 
-    const response: HttpResponse = await httpClient.get({
-      target: targetUrls.ADRESS_API_ENDPOINT,
+    const clientGetConfig: HttpClientGetConfig<string> = {
+      target: targetUrls.ADRESSE_API_ENDPOINT.url,
       targetParams: '18 avenue des Canuts 69120'
-    });
+    };
+
+    const response: HttpResponse = await httpClient.get(clientGetConfig);
 
     const expectedStatus: number = 200;
     const expectedData: object = {
@@ -67,17 +72,17 @@ describe('httpClient with axios concrete adapter', (): void => {
   it('should call API Adresse with invalid address and throw HttpClientError', async (): Promise<void> => {
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
+    const invalidUrlMaker: ResolvedUrl<string> = (rawQueryString: string): ValidUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString}&limit=1`;
 
-    const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
+    const targetUrls: Targets<TargetUrls> = {
+      ADDRESS_API_SEARCH_ENDPOINT: { url: invalidUrlMaker }
     };
 
     const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls);
 
     const responsePromise: Promise<HttpResponse> = httpClient.get({
-      target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
+      target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT.url,
       targetParams: '18 avenue des Canuts 69120'
     });
 
@@ -87,16 +92,16 @@ describe('httpClient with axios concrete adapter', (): void => {
   it('should call API Adresse with invalid address and throw remapped CustomError', async (): Promise<void> => {
     class CustomError extends Error {}
 
-    type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
+    type TargetKinds = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
+    const invalidUrlMaker: ResolvedUrl<string> = (rawQueryString: string): ValidUrl =>
+      `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString}&limit=1`;
 
-    const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
+    const targetUrls: Targets<TargetKinds> = {
+      ADDRESS_API_SEARCH_ENDPOINT: { url: invalidUrlMaker }
     };
 
-    const targetsErrorResponseOverrideMapper: ErrorMapper<TargetUrls> = {
+    const targetsErrorResponseOverrideMapper: ErrorMapper<TargetKinds> = {
       ADDRESS_API_SEARCH_ENDPOINT: {
         HttpClientError: (error: Error): Error =>
           new CustomError(`You have an invalid url you dummy dum dum ! ${error.message}`),
@@ -105,10 +110,10 @@ describe('httpClient with axios concrete adapter', (): void => {
       }
     };
 
-    const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls, targetsErrorResponseOverrideMapper);
+    const httpClient: HttpClient<TargetKinds> = new ManagedAxios(targetUrls, targetsErrorResponseOverrideMapper);
 
     const responsePromise: Promise<HttpResponse> = httpClient.get({
-      target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
+      target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT.url,
       targetParams: '18 avenue des Canuts 69120'
     });
 
@@ -118,11 +123,11 @@ describe('httpClient with axios concrete adapter', (): void => {
   it('Error log should contain enough info to help debug', async (): Promise<void> => {
     type TargetUrls = 'ADDRESS_API_SEARCH_ENDPOINT';
 
-    const targetToInvalidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
+    const invalidUrlMaker: ResolvedUrl<string> = (rawQueryString: string): ValidUrl =>
       `https://api-adresse.data.gouv.fr/search/?d=${rawQueryString as string}&limit=1`;
 
-    const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH_ENDPOINT: targetToInvalidSearchUrl
+    const targetUrls: Targets<TargetUrls> = {
+      ADDRESS_API_SEARCH_ENDPOINT: { url: invalidUrlMaker }
     };
 
     const httpClient: HttpClient<TargetUrls> = new ManagedAxios(targetUrls);
@@ -163,7 +168,7 @@ describe('httpClient with axios concrete adapter', (): void => {
     const error: Error | HttpClientError = await getError<HttpClientError>(
       async (): Promise<HttpResponse> =>
         httpClient.get({
-          target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT,
+          target: targetUrls.ADDRESS_API_SEARCH_ENDPOINT.url,
           targetParams: '18 avenue des Canuts 69120'
         })
     );
