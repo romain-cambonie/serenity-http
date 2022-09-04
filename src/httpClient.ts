@@ -1,27 +1,45 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import type { AxiosRequestConfig, AxiosResponseHeaders } from 'axios';
 import { ConfigurationError, HttpClientError, HttpServerError } from './errors';
 
-export interface HttpClient<TargetUrls extends string> {
+export interface HttpClient<Target extends string> {
   get: (config: HttpClientGetConfig) => Promise<HttpResponse>;
   post: (config: HttpClientPostConfig) => Promise<HttpResponse>;
-  targetUrls: Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>;
+  targets: Record<Target, TargetConfiguration>;
 }
 
-// TODO Do better with a generic
-export type TargetParams = number | object | string;
+export type Targets<Target extends string> = Record<Target, TargetConfiguration>;
+export type TargetConfiguration = {
+  makeUrl: MakeUrlTypes;
+};
 
-export const getTargetFromPredicate = (
-  predicate: (params?: TargetParams) => AbsoluteUrl,
-  targetsUrls: Record<string, (params?: TargetParams) => AbsoluteUrl>
-): never | string => {
-  const target: string | undefined = Object.keys(targetsUrls).find(
-    (targetsUrlKey: string): boolean => targetsUrls[targetsUrlKey] === predicate
+type MakeUrlTypes = /*WithCustomType |*/ WithNumber | WithString | WithUndefined;
+export type WithUndefined = (params: undefined) => Url;
+export type WithNumber = (params: number) => Url;
+export type WithCustomType = <T extends object>(params: T) => Url;
+export type WithString = (params: string) => Url;
+
+export type ErrorMapper<Target extends string> = Partial<Record<Target, Partial<Record<string, (error: Error) => Error>>>>;
+
+export type Url = `${Http}${string}`;
+
+export const isTarget = <Target extends string>(url: string, targets: Targets<Target>): url is Target => {
+  const targetsAsConst: readonly string[] = [...Object.keys(targets)] as const;
+  return targetsAsConst.includes(url);
+};
+
+export const getTargetFromPredicate = <Target extends string>(
+  predicate: WithCustomType | WithNumber | WithString | WithUndefined,
+  targets: Targets<Target>
+): Target | never => {
+  const targetFromPredicate: string | undefined = Object.keys(targets).find(
+    (targetsUrlKey: string): boolean => targets[targetsUrlKey as Target].makeUrl === predicate
   );
 
-  if (target === undefined)
+  if (targetFromPredicate === undefined || !isTarget(targetFromPredicate, targets))
     throw new ConfigurationError('Invalid configuration: This target predicate does not match any registered target');
 
-  return target;
+  return targetFromPredicate;
 };
 
 export const isHttpError = (error: unknown): error is HttpClientError | HttpServerError =>
@@ -29,17 +47,9 @@ export const isHttpError = (error: unknown): error is HttpClientError | HttpServ
 
 type Http = 'http://' | 'https://';
 
-export type AbsoluteUrl = `${Http}${string}`;
-
 export const isHttpClientError = (httpStatusCode: number): boolean => httpStatusCode >= 400 && httpStatusCode < 500;
 
 export const isHttpServerError = (httpStatusCode: number): boolean => httpStatusCode >= 500 && httpStatusCode < 600;
-
-export type TargetUrlsMapper<TargetUrls extends string> = Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>;
-
-export type ErrorMapper<TargetUrls extends string> = Partial<
-  Record<TargetUrls, Partial<Record<string, (error: Error) => Error>>>
->;
 
 // TODO Permettre de retourner data: T si une fct de validation qui fait le typeguard est fournie.
 export interface HttpResponse {
@@ -52,8 +62,8 @@ export interface HttpResponse {
 }
 
 export interface HttpClientTargetConfig {
-  target: (params?: TargetParams) => AbsoluteUrl;
-  targetParams?: TargetParams;
+  target: TargetConfiguration;
+  targetParams?: number | /*object |*/ string | undefined;
   adapterConfig?: AdapterConfig;
 }
 

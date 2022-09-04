@@ -277,7 +277,7 @@ module.exports = {
     { caseSensitive: true, natural: true, minKeys: 2 },
   ],*/
   "sort-vars": "error",
-  "spaced-comment": ["error", "always"],
+  "spaced-comment": ["off", "always"],
   strict: "error",
   "symbol-description": "error",
   "vars-on-top": "error",

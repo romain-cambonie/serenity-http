@@ -25,7 +25,7 @@ npm install @serenity-dev/http-client
 
 ### Gateway example
 
-#### Targets definition
+#### Target definition
 
 #### Http to Domain error mapping
 
