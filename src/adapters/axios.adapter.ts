@@ -1,7 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import {
-  AbsoluteUrl,
   AdapterConfig,
   ErrorMapper,
   getTargetFromPredicate,
@@ -9,46 +8,22 @@ import {
   HttpClientGetConfig,
   HttpClientPostConfig,
   HttpResponse,
-  TargetParams
+  TargetConfiguration
 } from '../httpClient';
 
 import { onFullfilledDefaultResponseInterceptorMaker, onRejectDefaultResponseInterceptorMaker } from './axios.config';
 import { shallowMergeConfigs } from './axios.mappers';
 
-export type AxiosErrorWithResponse = AxiosError & { response: AxiosResponse };
-
-export type ResponseInterceptor = (response: AxiosResponse) => AxiosResponse;
-export type ErrorInterceptor = (rawAxiosError: AxiosError) => never;
-
-export interface TargetErrorContext<TargetUrls extends string> {
-  target: TargetUrls;
-  errorMapper: ErrorMapper<TargetUrls>;
-}
-
-export type ErrorInterceptorMaker = <TargetUrls extends string>(context: TargetErrorContext<TargetUrls>) => ErrorInterceptor;
-
-interface AxiosInstanceContext {
-  axiosRequestConfig: AxiosRequestConfig;
-  onFulfilledResponseInterceptor: ResponseInterceptor;
-  onRejectResponseInterceptor: ErrorInterceptor;
-}
-
-export interface ContextType<TargetUrls extends string> {
-  config: AxiosRequestConfig;
-  target: TargetUrls;
-  errorMapper: ErrorMapper<TargetUrls>;
-}
-
-export class ManagedAxios<TargetUrls extends string> implements HttpClient<TargetUrls> {
+export class ManagedAxios<TargetKinds extends string> implements HttpClient<TargetKinds> {
   constructor(
-    public readonly targetUrls: Record<TargetUrls, (params?: TargetParams) => AbsoluteUrl>,
-    private readonly targetsErrorMapper: ErrorMapper<TargetUrls> = {},
+    public readonly targets: Record<TargetKinds, TargetConfiguration>,
+    private readonly targetsErrorMapper: ErrorMapper<TargetKinds> = {},
     private readonly defaultRequestConfig: AxiosRequestConfig = {},
     private readonly onFulfilledResponseInterceptorMaker: (
-      context: ContextType<TargetUrls>
+      context: ContextType<TargetKinds>
     ) => ResponseInterceptor = onFullfilledDefaultResponseInterceptorMaker,
     private readonly onRejectResponseInterceptorMaker: (
-      context: ContextType<TargetUrls>
+      context: ContextType<TargetKinds>
     ) => (rawAxiosError: AxiosError) => never = onRejectDefaultResponseInterceptorMaker
   ) {}
 
@@ -68,7 +43,14 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient<Targe
       axiosRequestConfig,
       onFulfilledResponseInterceptor,
       onRejectResponseInterceptor
-    }).get(config.target(config.targetParams));
+    }).get(
+      config.target.makeUrl(
+        // TODO Did not find a way to narrow types : https://github.com/microsoft/TypeScript/issues/13995 related ?
+        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error,@typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        config.targetParams
+      )
+    );
   }
 
   public async post(config: HttpClientPostConfig): Promise<HttpResponse> {
@@ -79,13 +61,21 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient<Targe
       axiosRequestConfig,
       onFulfilledResponseInterceptor,
       onRejectResponseInterceptor
-    }).post(config.target(config.targetParams), config.data);
+    }).post(
+      config.target.makeUrl(
+        // TODO Did not find a way to narrow types : https://github.com/microsoft/TypeScript/issues/13995 related ?
+        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error,@typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        config.targetParams
+      ),
+      config.data
+    );
   }
 
   private readonly clientInstanceContext = (targetConfig: HttpClientGetConfig): AxiosInstanceContext => {
-    const target: TargetUrls = getTargetFromPredicate(targetConfig.target, this.targetUrls) as TargetUrls;
+    const target: TargetKinds = getTargetFromPredicate(targetConfig.target.makeUrl, this.targets) as TargetKinds;
     const mergedConfigs: AdapterConfig = shallowMergeConfigs(this.defaultRequestConfig, targetConfig);
-    const context: ContextType<TargetUrls> = {
+    const context: ContextType<TargetKinds> = {
       config: mergedConfigs,
       target,
       errorMapper: this.targetsErrorMapper
@@ -101,4 +91,28 @@ export class ManagedAxios<TargetUrls extends string> implements HttpClient<Targe
       onRejectResponseInterceptor
     };
   };
+}
+
+export type AxiosErrorWithResponse = AxiosError & { response: AxiosResponse };
+
+export type ResponseInterceptor = (response: AxiosResponse) => AxiosResponse;
+export type ErrorInterceptor = (rawAxiosError: AxiosError) => never;
+
+export interface TargetErrorContext<Target extends string> {
+  target: Target;
+  errorMapper: ErrorMapper<Target>;
+}
+
+export type ErrorInterceptorMaker = <Target extends string>(context: TargetErrorContext<Target>) => ErrorInterceptor;
+
+interface AxiosInstanceContext {
+  axiosRequestConfig: AxiosRequestConfig;
+  onFulfilledResponseInterceptor: ResponseInterceptor;
+  onRejectResponseInterceptor: ErrorInterceptor;
+}
+
+export interface ContextType<Target extends string> {
+  config: AxiosRequestConfig;
+  target: Target;
+  errorMapper: ErrorMapper<Target>;
 }

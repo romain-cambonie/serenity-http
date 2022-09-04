@@ -13,8 +13,8 @@ export const onFullfilledDefaultResponseInterceptorMaker =
     return response;
   };
 
-export const onRejectDefaultResponseInterceptorMaker = <TargetUrls extends string>(
-  context: TargetErrorContext<TargetUrls>
+export const onRejectDefaultResponseInterceptorMaker = <Target extends string>(
+  context: TargetErrorContext<Target>
 ): ErrorInterceptor => {
   const toMappedError: (error: Error) => Error = toMappedErrorMaker(context.target, context.errorMapper);
 

@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import {
-  AbsoluteUrl,
-  getTargetFromPredicate,
-  isHttpClientError,
-  isHttpServerError,
-  TargetParams,
-  TargetUrlsMapper
-} from './httpClient';
+import { getTargetFromPredicate, isHttpClientError, isHttpServerError, Targets, Url } from './httpClient';
 
 describe('Http Client Errors', (): void => {
   it.each([
@@ -49,20 +42,20 @@ describe('Http Server Errors', (): void => {
 
 describe('find target from callback', (): void => {
   it('getTargetFromPredicate should return', (): void => {
-    type TargetUrls = 'ADDRESS_API_GEOLOCATE' | 'ADDRESS_API_SEARCH';
+    type Target = 'ADDRESS_API_GEOLOCATE' | 'ADDRESS_API_SEARCH';
 
-    const targetToValidSearchUrl = (rawQueryString?: TargetParams): AbsoluteUrl =>
-      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString as string)}&limit=1`;
+    const targetToValidSearchUrl = (rawQueryString: string): Url =>
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString)}&limit=1`;
 
-    const targetToGeolocateUrl = (): AbsoluteUrl => `https://geo.api.gouv.fr/communes`;
+    const targetToGeolocateUrl = (): Url => `https://geo.api.gouv.fr/communes`;
 
-    const targetUrls: TargetUrlsMapper<TargetUrls> = {
-      ADDRESS_API_SEARCH: targetToValidSearchUrl,
-      ADDRESS_API_GEOLOCATE: targetToGeolocateUrl
+    const targetUrls: Targets<Target> = {
+      ADDRESS_API_SEARCH: { makeUrl: targetToValidSearchUrl },
+      ADDRESS_API_GEOLOCATE: { makeUrl: targetToGeolocateUrl }
     };
 
-    expect(getTargetFromPredicate(targetToValidSearchUrl, targetUrls)).toBe('ADDRESS_API_SEARCH');
+    expect(getTargetFromPredicate(targetUrls.ADDRESS_API_SEARCH.makeUrl, targetUrls)).toBe('ADDRESS_API_SEARCH');
 
-    expect(getTargetFromPredicate(targetToGeolocateUrl, targetUrls)).toBe('ADDRESS_API_GEOLOCATE');
+    expect(getTargetFromPredicate(targetUrls.ADDRESS_API_GEOLOCATE.makeUrl, targetUrls)).toBe('ADDRESS_API_GEOLOCATE');
   });
 });
