@@ -98,21 +98,21 @@ export type AxiosErrorWithResponse = AxiosError & { response: AxiosResponse };
 export type ResponseInterceptor = (response: AxiosResponse) => AxiosResponse;
 export type ErrorInterceptor = (rawAxiosError: AxiosError) => never;
 
-export interface TargetErrorContext<Target extends string> {
+export type TargetErrorContext<Target extends string> = {
   target: Target;
   errorMapper: ErrorMapper<Target>;
-}
+};
 
 export type ErrorInterceptorMaker = <Target extends string>(context: TargetErrorContext<Target>) => ErrorInterceptor;
 
-interface AxiosInstanceContext {
+type AxiosInstanceContext = {
   axiosRequestConfig: AxiosRequestConfig;
   onFulfilledResponseInterceptor: ResponseInterceptor;
   onRejectResponseInterceptor: ErrorInterceptor;
-}
+};
 
-export interface ContextType<Target extends string> {
+export type ContextType<Target extends string> = {
   config: AxiosRequestConfig;
   target: Target;
   errorMapper: ErrorMapper<Target>;
-}
+};

@@ -1,23 +1,19 @@
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import type { AxiosRequestConfig, AxiosResponseHeaders } from 'axios';
 import { ConfigurationError, HttpClientError, HttpServerError } from './errors';
 
-export interface HttpClient<Target extends string> {
+export type HttpClient<Target extends string> = {
   get: (config: HttpClientGetConfig) => Promise<HttpResponse>;
   post: (config: HttpClientPostConfig) => Promise<HttpResponse>;
   targets: Record<Target, TargetConfiguration>;
-}
+};
 
 export type Targets<Target extends string> = Record<Target, TargetConfiguration>;
 export type TargetConfiguration = {
-  makeUrl: MakeUrlTypes;
+  makeUrl: UrlMaker;
 };
 
-type MakeUrlTypes = /*WithCustomType |*/ WithNumber | WithString | WithUndefined;
-export type WithUndefined = (params: undefined) => Url;
-export type WithNumber = (params: number) => Url;
-export type WithCustomType = <T extends object>(params: T) => Url;
-export type WithString = (params: string) => Url;
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+export type UrlMaker = (params?: any) => Url;
 
 export type ErrorMapper<Target extends string> = Partial<Record<Target, Partial<Record<string, (error: Error) => Error>>>>;
 
@@ -29,7 +25,7 @@ export const isTarget = <Target extends string>(url: string, targets: Targets<Ta
 };
 
 export const getTargetFromPredicate = <Target extends string>(
-  predicate: WithCustomType | WithNumber | WithString | WithUndefined,
+  predicate: UrlMaker,
   targets: Targets<Target>
 ): Target | never => {
   const targetFromPredicate: string | undefined = Object.keys(targets).find(
@@ -52,20 +48,21 @@ export const isHttpClientError = (httpStatusCode: number): boolean => httpStatus
 export const isHttpServerError = (httpStatusCode: number): boolean => httpStatusCode >= 500 && httpStatusCode < 600;
 
 // TODO Permettre de retourner data: T si une fct de validation qui fait le typeguard est fournie.
-export interface HttpResponse {
+export type HttpResponse = {
   data: unknown;
   status: number;
   statusText: string;
   headers: AdapterResponseHeaders;
   config: AdapterConfig;
   request?: object; // TODO To type better
-}
+};
 
-export interface HttpClientTargetConfig {
+export type HttpClientTargetConfig = {
   target: TargetConfiguration;
-  targetParams?: number | /*object |*/ string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  targetParams?: any;
   adapterConfig?: AdapterConfig;
-}
+};
 
 export type HttpClientGetConfig = HttpClientTargetConfig;
 
