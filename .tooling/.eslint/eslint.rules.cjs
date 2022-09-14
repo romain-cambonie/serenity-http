@@ -130,7 +130,7 @@ module.exports = {
   "max-nested-callbacks": ["error", 2],
   "max-params": ["off", 3],
   "max-statements": ["error", 8],
-  "multiline-comment-style": "error",
+  "multiline-comment-style": "off",
   "new-cap": "off",
   "no-alert": "error",
   "no-array-constructor": "off",

@@ -1,6 +1,6 @@
 import type { AxiosResponse } from 'axios';
 import { HttpClientError, HttpClientForbiddenError, HttpServerError } from '../errors';
-import { AdapterConfig, HttpClientTargetConfig, isHttpClientError, isHttpServerError } from '../httpClient';
+import { AdapterConfig, isHttpClientError, isHttpServerError } from '../httpClient';
 import type { AxiosErrorWithResponse } from './axios.adapter';
 import {
   AxiosInfrastructureError,
@@ -138,7 +138,7 @@ const toAxiosInfrastructureErrorString = (error: unknown): string => {
   );
 };
 
-export const shallowMergeConfigs = (initialConfig: AdapterConfig, additionalConfig: HttpClientTargetConfig): AdapterConfig => ({
+export const shallowMergeConfigs = (initialConfig: AdapterConfig, additionalConfig: AdapterConfig): AdapterConfig => ({
   ...initialConfig,
-  ...additionalConfig.adapterConfig
+  ...additionalConfig
 });
