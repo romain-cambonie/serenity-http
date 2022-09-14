@@ -1,6 +1,6 @@
 import type { AxiosRequestHeaders, AxiosResponse } from 'axios';
 import { HttpClientError, HttpServerError } from '../errors';
-import type { Url, AdapterConfig, HttpClientTargetConfig } from '../httpClient';
+import type { AdapterConfig } from '../httpClient';
 import type { AxiosErrorWithResponse } from './axios.adapter';
 import { shallowMergeConfigs, toHttpError } from './axios.mappers';
 
@@ -52,14 +52,11 @@ describe('Configurations', (): void => {
       headers: defaultHeaders
     };
 
-    const targetSpecificConfig: HttpClientTargetConfig = {
-      target: { makeUrl: (): Url => 'https://plop' },
-      adapterConfig: {
-        headers: {
-          accept: 'text/html; charset=UTF-8'
-        },
-        timeoutErrorMessage: 'PLOP'
-      }
+    const targetSpecificConfig: AdapterConfig = {
+      headers: {
+        accept: 'text/html; charset=UTF-8'
+      },
+      timeoutErrorMessage: 'PLOP'
     };
 
     const expected: AdapterConfig = {

@@ -2,14 +2,22 @@ import type { AxiosRequestConfig, AxiosResponseHeaders } from 'axios';
 import { ConfigurationError, HttpClientError, HttpServerError } from './errors';
 
 export type HttpClient<Target extends string> = {
-  get: (config: HttpClientGetConfig) => Promise<HttpResponse>;
-  post: (config: HttpClientPostConfig) => Promise<HttpResponse>;
-  targets: Record<Target, TargetConfiguration>;
+  execute: <ExternalContract>(targetRequestConfiguration: RequestTarget<Target>) => Promise<HttpResponse<ExternalContract>>;
+};
+
+export type RequestTarget<Target> = {
+  target: Target;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  urlParams?: any;
+  data?: object | string;
 };
 
 export type Targets<Target extends string> = Record<Target, TargetConfiguration>;
-export type TargetConfiguration = {
+
+export type TargetConfiguration<T = unknown> = {
+  adapterConfig?: AdapterConfig;
   makeUrl: UrlMaker;
+  externalContractTypeguard?: (data: unknown) => data is T;
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -47,27 +55,22 @@ export const isHttpClientError = (httpStatusCode: number): boolean => httpStatus
 
 export const isHttpServerError = (httpStatusCode: number): boolean => httpStatusCode >= 500 && httpStatusCode < 600;
 
-// TODO Permettre de retourner data: T si une fct de validation qui fait le typeguard est fournie.
-export type HttpResponse = {
+export type UnknownHttpResponse = {
   data: unknown;
   status: number;
   statusText: string;
   headers: AdapterResponseHeaders;
   config: AdapterConfig;
-  request?: object; // TODO To type better
+  request?: object;
 };
 
-export type HttpClientTargetConfig = {
-  target: TargetConfiguration;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  targetParams?: any;
-  adapterConfig?: AdapterConfig;
-};
-
-export type HttpClientGetConfig = HttpClientTargetConfig;
-
-export type HttpClientPostConfig = HttpClientTargetConfig & {
-  data?: object | string;
+export type HttpResponse<T = unknown> = {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: AdapterResponseHeaders;
+  config: AdapterConfig;
+  request?: object;
 };
 
 // Equivalent to axios AxiosRequestConfig for now but port may change over time

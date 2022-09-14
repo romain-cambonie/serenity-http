@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import { getTargetFromPredicate, isHttpClientError, isHttpServerError, Targets, Url, UrlMaker } from './httpClient';
 
 describe('Http Client Errors', (): void => {
@@ -50,7 +48,9 @@ describe('find target from callback', (): void => {
     const targetToGeolocateUrl = (): Url => `https://geo.api.gouv.fr/communes`;
 
     const targetUrls: Targets<Target> = {
-      ADDRESS_API_SEARCH: { makeUrl: targetToValidSearchUrl },
+      ADDRESS_API_SEARCH: {
+        makeUrl: targetToValidSearchUrl
+      },
       ADDRESS_API_GEOLOCATE: { makeUrl: targetToGeolocateUrl }
     };
 

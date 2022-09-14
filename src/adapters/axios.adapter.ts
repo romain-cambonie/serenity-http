@@ -1,14 +1,15 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ConfigurationError, TypeguardError } from '../errors';
 
 import {
   AdapterConfig,
   ErrorMapper,
   getTargetFromPredicate,
   HttpClient,
-  HttpClientGetConfig,
-  HttpClientPostConfig,
   HttpResponse,
-  TargetConfiguration
+  RequestTarget,
+  TargetConfiguration,
+  UnknownHttpResponse
 } from '../httpClient';
 
 import { onFullfilledDefaultResponseInterceptorMaker, onRejectDefaultResponseInterceptorMaker } from './axios.config';
@@ -27,6 +28,34 @@ export class ManagedAxios<TargetKinds extends string> implements HttpClient<Targ
     ) => (rawAxiosError: AxiosError) => never = onRejectDefaultResponseInterceptorMaker
   ) {}
 
+  public async execute<ExternalContract>({
+    target,
+    urlParams,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    data
+  }: RequestTarget<TargetKinds>): Promise<HttpResponse<ExternalContract>> {
+    const targetConfig: TargetConfiguration = this.targets[target];
+    const { axiosRequestConfig, onFulfilledResponseInterceptor, onRejectResponseInterceptor }: AxiosInstanceContext =
+      this.clientInstanceContext(targetConfig);
+
+    const response: UnknownHttpResponse = await ManagedAxios.workerInstance({
+      axiosRequestConfig,
+      onFulfilledResponseInterceptor,
+      onRejectResponseInterceptor
+    }).request({
+      url: targetConfig.makeUrl(urlParams),
+      method: axiosRequestConfig.method,
+      data
+    });
+
+    if (targetConfig.externalContractTypeguard != null && !targetConfig.externalContractTypeguard(response.data))
+      throw new TypeguardError(
+        `Got response but data does not validate the typeguard, received:\n ${JSON.stringify(response.data, null, 2)}`
+      );
+
+    return response as HttpResponse<ExternalContract>;
+  }
+
   private static readonly workerInstance = (context: AxiosInstanceContext): AxiosInstance => {
     const axiosInstance: AxiosInstance = axios.create(context.axiosRequestConfig);
 
@@ -35,46 +64,11 @@ export class ManagedAxios<TargetKinds extends string> implements HttpClient<Targ
     return axiosInstance;
   };
 
-  public async get(config: HttpClientGetConfig): Promise<HttpResponse> {
-    const { axiosRequestConfig, onFulfilledResponseInterceptor, onRejectResponseInterceptor }: AxiosInstanceContext =
-      this.clientInstanceContext(config);
-
-    return ManagedAxios.workerInstance({
-      axiosRequestConfig,
-      onFulfilledResponseInterceptor,
-      onRejectResponseInterceptor
-    }).get(
-      config.target.makeUrl(
-        // TODO Did not find a way to narrow types : https://github.com/microsoft/TypeScript/issues/13995 related ?
-        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error,@typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        config.targetParams
-      )
-    );
-  }
-
-  public async post(config: HttpClientPostConfig): Promise<HttpResponse> {
-    const { axiosRequestConfig, onFulfilledResponseInterceptor, onRejectResponseInterceptor }: AxiosInstanceContext =
-      this.clientInstanceContext(config);
-
-    return ManagedAxios.workerInstance({
-      axiosRequestConfig,
-      onFulfilledResponseInterceptor,
-      onRejectResponseInterceptor
-    }).post(
-      config.target.makeUrl(
-        // TODO Did not find a way to narrow types : https://github.com/microsoft/TypeScript/issues/13995 related ?
-        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error,@typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        config.targetParams
-      ),
-      config.data
-    );
-  }
-
-  private readonly clientInstanceContext = (targetConfig: HttpClientGetConfig): AxiosInstanceContext => {
-    const target: TargetKinds = getTargetFromPredicate(targetConfig.target.makeUrl, this.targets) as TargetKinds;
-    const mergedConfigs: AdapterConfig = shallowMergeConfigs(this.defaultRequestConfig, targetConfig);
+  private readonly clientInstanceContext = (targetConfig: TargetConfiguration): AxiosInstanceContext => {
+    const target: TargetKinds = getTargetFromPredicate(targetConfig.makeUrl, this.targets) as TargetKinds;
+    const mergedConfigs: AdapterConfig = shallowMergeConfigs(this.defaultRequestConfig, targetConfig.adapterConfig ?? {});
+    if (!validConfig(mergedConfigs))
+      throw new ConfigurationError(`Invalid minimal configuration: should at least contain 'method' key`);
     const context: ContextType<TargetKinds> = {
       config: mergedConfigs,
       target,
@@ -116,3 +110,5 @@ export type ContextType<Target extends string> = {
   target: Target;
   errorMapper: ErrorMapper<Target>;
 };
+
+const validConfig = (config: AdapterConfig): boolean => 'method' in config;
