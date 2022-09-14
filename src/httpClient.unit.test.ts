@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
-import { getTargetFromPredicate, isHttpClientError, isHttpServerError, Targets, Url } from './httpClient';
+import { getTargetFromPredicate, isHttpClientError, isHttpServerError, Targets, Url, UrlMaker } from './httpClient';
 
 describe('Http Client Errors', (): void => {
   it.each([
@@ -44,8 +44,8 @@ describe('find target from callback', (): void => {
   it('getTargetFromPredicate should return', (): void => {
     type Target = 'ADDRESS_API_GEOLOCATE' | 'ADDRESS_API_SEARCH';
 
-    const targetToValidSearchUrl = (rawQueryString: string): Url =>
-      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(rawQueryString)}&limit=1`;
+    const targetToValidSearchUrl: UrlMaker = (params: { query: string }): Url =>
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURI(params.query)}&limit=1`;
 
     const targetToGeolocateUrl = (): Url => `https://geo.api.gouv.fr/communes`;
 

@@ -46,7 +46,7 @@ module.exports = {
       objectLiteralTypeAssertions: "never",
     },
   ],
-  "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+  "@typescript-eslint/consistent-type-definitions": ["error", "type"],
   "@typescript-eslint/consistent-type-exports": "error",
   "@typescript-eslint/consistent-type-imports": "off",
   "@typescript-eslint/explicit-function-return-type": [

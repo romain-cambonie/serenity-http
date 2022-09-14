@@ -31,7 +31,6 @@
     "noImplicitReturns": true /* When enabled, TypeScript will check all code paths in a function to ensure they return a value */,
     "allowUnusedLabels": false /* https://www.typescriptlang.org/tsconfig#allowUnusedLabels */,
     "allowUnreachableCode": false /* https://www.typescriptlang.org/tsconfig#allowUnreachableCode */,
-    "exactOptionalPropertyTypes": true /* https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes */,
     "noFallthroughCasesInSwitch": true /* https://www.typescriptlang.org/tsconfig#noFallthroughCasesInSwitch */,
     "noPropertyAccessFromIndexSignature": true /* https://www.typescriptlang.org/tsconfig#noPropertyAccessFromIndexSignature */,
     "noUncheckedIndexedAccess": true /* https://www.typescriptlang.org/tsconfig#noUncheckedIndexedAccess */,

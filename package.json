@@ -9,7 +9,7 @@
   ],
   "homepage": "https://npmjs.com/package/@serenity-dev/http-client",
   "scripts": {
-    "build": "yarn build:esm",
+    "build": "yarn build:esm & yarn build:cjs",
     "build:esm": "tsc -p .tsconfigs/tsconfig.16.esm.json",
     "build:cjs": "tsc -p .tsconfigs/tsconfig.16.cjs.json",
     "lint": "eslint --config=./.tooling/.eslint/.eslintrc.cjs  ./src/",
